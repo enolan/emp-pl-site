@@ -17,6 +17,7 @@ getHomeR = do
     (formWidget, formEnctype) <- generateFormPost sampleForm
     let submission = Nothing :: Maybe (FileInfo, Text)
         handlerName = "getHomeR" :: Text
+    comments :: [Comment] <- fmap (map entityVal) $ runDB $ selectList [] []
     defaultLayout $ do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
         aDomId <- newIdent
@@ -31,6 +32,7 @@ postHomeR = do
             FormSuccess res -> Just res
             _ -> Nothing
 
+    comments :: [Comment] <- fmap (map entityVal) $ runDB $ selectList [] []
     defaultLayout $ do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
         aDomId <- newIdent

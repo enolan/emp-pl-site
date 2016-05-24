@@ -64,6 +64,8 @@
         Create comment
 
     <ul ##{commentListId}>
+      $forall Comment msg _ <- comments
+        <li>#{msg}
 
 <section.page-header>
   <h2>Testing
