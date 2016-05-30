@@ -32,5 +32,4 @@ database:
   database: "_env:PGDATABASE:empplsite_lower"
   poolsize: "_env:PGPOOLSIZE:10"
 
-copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

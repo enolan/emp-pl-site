@@ -1,11 +1,17 @@
 module Import.NoFoundation
-    ( module Import
+    ( module Import,
+      setTitle
     ) where
 
-import ClassyPrelude.Yesod   as Import
+import ClassyPrelude.Yesod as Import hiding (setTitle)
+import qualified Yesod.Core.Widget(setTitle)
 import Model                 as Import
 import Settings              as Import
 import Settings.StaticFiles  as Import
 import Yesod.Auth            as Import
 import Yesod.Core.Types      as Import (loggerSet)
 import Yesod.Default.Config2 as Import
+
+setTitle :: MonadWidget m => Html -> m ()
+setTitle t = Yesod.Core.Widget.setTitle $
+  "Software Quality Causes Project - " `mappend` t
