@@ -4,7 +4,7 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
-import Yesod.Auth.OpenId    (authOpenId, IdentifierType (Claimed))
+import Yesod.Auth.GoogleEmail2    (authGoogleEmail)
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
@@ -52,7 +52,7 @@ instance Yesod App where
 
     -- Store session data on the client in encrypted cookies,
     -- default session idle timeout is 120 minutes
-    makeSessionBackend _ = Just <$> defaultClientSessionBackend
+    makeSessionBackend _ = sslOnlySessions $ Just <$> defaultClientSessionBackend
         120    -- timeout in minutes
         "config/client_session_key.aes"
 
@@ -62,7 +62,7 @@ instance Yesod App where
     --   a) Sets a cookie with a CSRF token in it.
     --   b) Validates that incoming write requests include that token in either a header or POST parameter.
     -- For details, see the CSRF documentation in the Yesod.Core.Handler module of the yesod-core package.
-    yesodMiddleware = defaultCsrfMiddleware
+    yesodMiddleware = sslOnlyMiddleware 120 . defaultCsrfMiddleware
 
     defaultLayout widget = do
         master <- getYesod
@@ -127,7 +127,7 @@ instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner appConnPool
 
 instance YesodAuth App where
-    type AuthId App = UserId
+    type AuthId App = Text
 
     -- Where to send a user after successful login
     loginDest _ = HomeR
@@ -135,22 +135,15 @@ instance YesodAuth App where
     logoutDest _ = HomeR
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
-
-    authenticate creds = runDB $ do
-        x <- getBy $ UniqueUser $ credsIdent creds
-        case x of
-            Just (Entity uid _) -> return $ Authenticated uid
-            Nothing -> Authenticated <$> insert User
-                { userIdent = credsIdent creds
-                , userPassword = Nothing
-                }
-
+    getAuthId = return . Just . credsIdent
     -- You can add other plugins like Google Email, email or OAuth here
-    authPlugins _ = [authOpenId Claimed []]
+    authPlugins app = [authGoogleEmail']
+      where authGoogleEmail' = authGoogleEmail
+              (gOAuthCID $ appSettings app)
+              (gOAuthCS $ appSettings app)
 
     authHttpManager = getHttpManager
-
-instance YesodAuthPersist App
+    maybeAuthId = lookupSession "_ID"
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.

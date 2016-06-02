@@ -7,3 +7,8 @@ Whether it's language, testing, code review, community norms or dark rituals,
 we're trying to find out. For now, you can help by telling us what you think
 about different programs.
 
+#{show maid}
+$maybe _ <- maid
+  <p><a href=@{AuthR LogoutR}>Logout
+$nothing
+  <p><a href=@{AuthR LoginR}>Login

@@ -11,6 +11,7 @@ import Import
 -- inclined, or create a single monolithic file.
 getHomeR :: Handler Html
 getHomeR = do
-    defaultLayout $ do
-        setTitle "Home"
-        $(widgetFile "homepage")
+  maid <- maybeAuthId
+  defaultLayout $ do
+    setTitle "Home"
+    $(widgetFile "homepage")

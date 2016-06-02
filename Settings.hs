@@ -51,6 +51,9 @@ data AppSettings = AppSettings
 
     , appAnalytics              :: Maybe Text
     -- ^ Google Analytics code
+
+    , gOAuthCID                 :: Text
+    , gOAuthCS                  :: Text
     }
 
 instance FromJSON AppSettings where
@@ -75,6 +78,8 @@ instance FromJSON AppSettings where
         appSkipCombining          <- o .:? "skip-combining"   .!= defaultDev
 
         appAnalytics              <- o .:? "analytics"
+        gOAuthCID                 <- o .:  "gOAuthCID"
+        gOAuthCS                  <- o .:  "gOAuthCS"
 
         return AppSettings {..}
 

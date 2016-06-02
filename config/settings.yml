@@ -33,3 +33,6 @@ database:
   poolsize: "_env:PGPOOLSIZE:10"
 
 #analytics: UA-YOURCODE
+
+gOAuthCID: "_env:GOAUTHCID:broken"
+gOAuthCS:  "_env:GOAUTHCS:broken"
