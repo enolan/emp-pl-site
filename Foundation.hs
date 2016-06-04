@@ -5,6 +5,7 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
 import Yesod.Auth.GoogleEmail2    (authGoogleEmail)
+import Yesod.Auth.Message
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
@@ -127,7 +128,7 @@ instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner appConnPool
 
 instance YesodAuth App where
-    type AuthId App = Text
+    type AuthId App = UserId
 
     -- Where to send a user after successful login
     loginDest _ = HomeR
@@ -135,7 +136,11 @@ instance YesodAuth App where
     logoutDest _ = HomeR
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
-    getAuthId = return . Just . credsIdent
+    authenticate creds = do
+      let email = credsIdent creds
+          user = User email
+      res <- runDB $ insertBy user
+      pure $ Authenticated $ either entityKey id res
     -- You can add other plugins like Google Email, email or OAuth here
     authPlugins app = [authGoogleEmail']
       where authGoogleEmail' = authGoogleEmail
@@ -143,7 +148,9 @@ instance YesodAuth App where
               (gOAuthCS $ appSettings app)
 
     authHttpManager = getHttpManager
-    maybeAuthId = lookupSession "_ID"
+--    maybeAuthId = lookupSession "_ID"
+
+instance YesodAuthPersist App
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
