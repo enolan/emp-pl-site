@@ -7,8 +7,11 @@ Whether it's language, testing, code review, community norms or dark rituals,
 we're trying to find out. For now, you can help by telling us what you think
 about different programs.
 
-#{show maid}
-$maybe _ <- maid
-  <p><a href=@{AuthR LogoutR}>Logout
-$nothing
-  <p><a href=@{AuthR LoginR}>Login
+<.survey-box>
+  <h2>Let's do it
+  $maybe ent <- mauth
+    Great, you're logged in as #{userEmail $ entityVal ent}. Not you?
+    <a href=@{AuthR LogoutR}>Log out.
+  $nothing
+    You need to <a href=@{AuthR LoginR}>log in via Google to participate.</a>
+    Don't worry, we'll keep your answers anonymous.
