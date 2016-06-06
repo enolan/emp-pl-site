@@ -143,7 +143,6 @@ instance YesodAuth App where
               (gOAuthCS $ appSettings app)
 
     authHttpManager = getHttpManager
---    maybeAuthId = lookupSession "_ID"
 
 instance YesodAuthPersist App
 
