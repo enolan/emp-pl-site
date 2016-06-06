@@ -4,7 +4,7 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
-import Yesod.Auth.GoogleEmail2    (authGoogleEmail)
+import Yesod.Auth.GoogleEmail2    (authGoogleEmail, forwardUrl)
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
@@ -143,7 +143,7 @@ instance YesodAuth App where
               (gOAuthCS $ appSettings app)
 
     authHttpManager = getHttpManager
-
+    loginHandler = redirect forwardUrl
 instance YesodAuthPersist App
 
 -- This instance is required to use forms. You can modify renderMessage to
