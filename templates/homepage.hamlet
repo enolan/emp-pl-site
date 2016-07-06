@@ -9,9 +9,4 @@ about different programs.
 
 <.survey-box>
   <h2>Let's do it
-  $maybe ent <- mauth
-    Great, you're logged in as #{userEmail $ entityVal ent}. Not you?
-    <a href=@{AuthR LogoutR}>Log out.
-  $nothing
-    You need to <a href=@{AuthR LoginR}>log in via Google to participate.</a>
-    Don't worry, we'll keep your answers anonymous.
+  ^{whatDo}

@@ -6,6 +6,7 @@ module Import.NoFoundation
 import ClassyPrelude.Yesod as Import hiding (setTitle)
 import qualified Yesod.Core.Widget(setTitle)
 import Model                 as Import
+import Model.CountryCodes    as Import ()
 import Settings              as Import
 import Settings.StaticFiles  as Import
 import Yesod.Auth            as Import

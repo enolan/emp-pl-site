@@ -5,5 +5,9 @@ User
 UserDemographics
     user UserId
     UniqueAssociatedUser user
-    age Int
+    birthYear UTCTime
+    gender Text
+    residence CountryCode
+    programmer Bool
+    deriving Typeable Show
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
