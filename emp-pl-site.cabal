@@ -48,6 +48,7 @@ library
                 TupleSections
                 RecordWildCards
                 ScopedTypeVariables
+                DeriveGeneric
 
     build-depends: base                          >= 4          && < 5
                  , yesod                         >= 1.4.3      && < 1.5

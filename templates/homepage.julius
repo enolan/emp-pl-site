@@ -1,0 +1,8 @@
+$("#demoForm").submit(function (ev) {
+    ev.preventDefault();
+    $.ajax({
+        method: "POST",
+        url: "/demoForm",
+        data: $(this).serializeArray()
+    })
+})

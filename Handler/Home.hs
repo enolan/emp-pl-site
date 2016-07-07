@@ -34,21 +34,46 @@ Great, you're logged in as #{userEmail $ entityVal userEnt}. Not you?
       case mdemo of
         Just demoEnt -> [whamlet|Time to tell us about programs!|]
         Nothing -> do
-          (formW, encType) <- handlerToWidget $ generateFormPost $ userForm (entityKey userEnt)
+          (formW, encType) <- handlerToWidget $ generateFormPost userForm
           [whamlet|
 We need some quick demographic information before we start:
 <form id=demoForm>
   ^{formW}
   <input type=submit>|]
 
-
 countryField :: Field Handler CountryCode
 countryField = selectFieldList countryList
 
-userForm :: UserId -> Form UserDemographics
-userForm uid = renderDivs $ UserDemographics <$>
-  pure uid <*>
+userForm :: Form (UTCTime, Text, CountryCode, Bool)
+userForm = renderDivs $ (,,,) <$>
   areq yearField "Year of birth" Nothing <*>
   areq textField "Gender" Nothing <*>
   areq countryField "Country of residence" Nothing <*>
   areq boolField "Are you a computer programmer?" Nothing
+
+postDemoFormR :: Handler Value
+postDemoFormR = do
+  ((formData, _), _) <- runFormPost $ userForm
+  mauth <- maybeAuth
+  $(logDebug) $ pack $ show formData
+  $(logDebug) $ pack $ show mauth
+  case formData of
+    FormSuccess (birthYear, gender, residence, programmer) ->
+      case mauth of
+        Nothing -> permissionDenied "Login to add demographic information"
+        Just uid -> do
+          res <- runDB $ insertBy $
+            UserDemographics {userDemographicsUser = entityKey uid
+                            ,userDemographicsBirthYear = birthYear
+                            ,userDemographicsGender = gender
+                            ,userDemographicsResidence = residence
+                            ,userDemographicsProgrammer = programmer}
+          case res of
+            Left _ -> invalidArgs ["User already has demographics"]
+            Right _ -> return $ toJSON $ PostDemoResponse True
+    _ -> invalidArgs []
+
+data PostDemoResponse = PostDemoResponse {ok :: Bool}
+  deriving (Generic, Show)
+instance ToJSON PostDemoResponse
+instance FromJSON PostDemoResponse
