@@ -113,6 +113,23 @@ instance Yesod App where
 
     makeLogger = return . appLogger
 
+    errorHandler errorResponse = do
+        $(logWarn) (mappend "Error Response: " $ pack (show errorResponse))
+        ajaxReq <- isAjax
+        let errorText NotFound = (404, "Not Found", "Sorry, not found")
+            errorText (InternalError msg) = (400, "Bad Request", msg)
+            errorText (InvalidArgs m) = (400, "Bad Request", unwords m)
+            errorText NotAuthenticated = (403, "Not authenticated", "You need to log in")
+            errorText (PermissionDenied msg) = (403, "Forbidden", msg)
+            errorText (BadMethod _) = (405, "Method Not Allowed",
+                                            "Method not supported")
+        when ajaxReq $ do
+            let (code, brief, full) = errorText errorResponse
+            sendResponseStatus
+                (mkStatus code brief)
+                $ RepPlain $ toContent $ mappend "Error: " full
+        defaultErrorHandler errorResponse
+
 -- How to run database actions.
 instance YesodPersist App where
     type YesodPersistBackend App = SqlBackend
@@ -143,7 +160,14 @@ instance YesodAuth App where
               (gOAuthCS $ appSettings app)
 
     authHttpManager = getHttpManager
-    loginHandler = redirect forwardUrl
+    loginHandler = do
+      ajaxReq <- isAjax
+      if ajaxReq
+        then do
+          clearUltDest
+          sendResponseStatus (mkStatus 403 "Forbidden") $
+            RepPlain $ toContent ("Login required" :: Text)
+        else redirect forwardUrl
 instance YesodAuthPersist App
 
 -- This instance is required to use forms. You can modify renderMessage to
@@ -167,3 +191,6 @@ unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
 -- https://github.com/yesodweb/yesod/wiki/Serve-static-files-from-a-separate-domain
 -- https://github.com/yesodweb/yesod/wiki/i18n-messages-in-the-scaffolding
+
+isAjax :: MonadHandler f => f Bool
+isAjax = maybe False (=="XMLHttpRequest") <$> lookupHeader "X-Requested-With"
