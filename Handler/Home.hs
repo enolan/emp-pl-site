@@ -32,9 +32,9 @@ Great, you're logged in as #{userEmail $ entityVal userEnt}. Not you?
 <a href=@{AuthR LogoutR}>Log out.</a>|]
       mdemo <- handlerToWidget $ runDB $ getBy (UniqueAssociatedUser $ entityKey userEnt)
       case mdemo of
-        Just demoEnt -> [whamlet|Time to tell us about programs!|]
+        Just _demoEnt -> [whamlet|Time to tell us about programs!|]
         Nothing -> do
-          (formW, encType) <- handlerToWidget $ generateFormPost userForm
+          (formW, _encType) <- handlerToWidget $ generateFormPost userForm
           [whamlet|
 We need some quick demographic information before we start:
 <form id=demoForm>
