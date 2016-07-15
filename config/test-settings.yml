@@ -7,5 +7,6 @@ database:
   #
   #   database: "_env:PGDATABASE:emp-pl-site_LOWER_test"
   database: empplsite_lower_test
-  googleUser: "_env:GOOGLEUSER"
-  googlePassword: "_env:GOOGLEPASSWORD"
+
+googleUser: "_env:GOOGLEUSER"
+googlePassword: "_env:GOOGLEPASSWORD"
