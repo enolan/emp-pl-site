@@ -17,4 +17,5 @@ cabal.sandbox.config
 *.swp
 *.keter
 TAGS
-withsecrets.sh
+yesod-devel.sh
+test.sh

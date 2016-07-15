@@ -11,6 +11,9 @@ module Application
     -- * for GHCI
     , handler
     , db
+    -- * for test server
+    , makeApplication
+    , warpSettings
     ) where
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
