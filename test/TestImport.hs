@@ -14,8 +14,9 @@ import Network.Wai.Handler.WarpTLS (tlsSettingsMemory, runTLS)
 import Model                 as X
 import Test.Hspec            as X
 import Text.Shakespeare.Text (st)
+import Settings              as X (AppSettings(..))
 import Yesod.Auth            as X (Route(..))
-import Yesod.Default.Config2 (ignoreEnv, loadYamlSettings)
+import Yesod.Default.Config2 as X (useEnv, loadYamlSettings)
 import Yesod.Test            as X
 
 runDB :: SqlPersistM a -> YesodExample App a
@@ -50,7 +51,7 @@ setupApp = do
     settings <- loadYamlSettings
         ["config/test-settings.yml", "config/settings.yml"]
         []
-        ignoreEnv
+        useEnv
     foundation <- makeFoundation settings
     wipeDB foundation
     logWare <- liftIO $ makeLogWare foundation
