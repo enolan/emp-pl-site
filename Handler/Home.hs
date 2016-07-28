@@ -39,7 +39,7 @@ Great, you're logged in as #{userEmail $ entityVal userEnt}. Not you?
 We need some quick demographic information before we start:
 <form id=demoForm>
   ^{formW}
-  <input type=submit>|]
+  <input type=submit value="Submit">|]
 
 countryField :: Field Handler CountryCode
 countryField = selectFieldList countryList
