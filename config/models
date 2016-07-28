@@ -1,7 +1,7 @@
 User
     email Text
     UniqueEmail email
-    deriving Typeable Show
+    deriving Typeable Show Eq
 UserDemographics
     user UserId
     UniqueAssociatedUser user

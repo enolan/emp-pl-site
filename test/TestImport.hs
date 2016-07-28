@@ -13,6 +13,7 @@ import Network.Wai.Handler.Warp (setPort)
 import Network.Wai.Handler.WarpTLS (tlsSettingsMemory, runTLS)
 import Model                 as X
 import Test.Hspec            as X
+import Test.WebDriver as WD
 import Text.Shakespeare.Text (st)
 import Settings              as X (AppSettings(..))
 import Yesod.Auth            as X (Route(..))
@@ -27,14 +28,15 @@ runDB query = do
 runDBWithApp :: App -> SqlPersistM a -> IO a
 runDBWithApp app query = runSqlPersistMPool query (appConnPool app)
 
+runDB' :: SqlPersistM a -> ReaderT (TestApp App) WD a
+runDB' q = ask >>= \(app, _) -> liftIO $ runDBWithApp app q
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before setupApp
 
--- regular withApp from the scaffold doesn't actually launch the server.
-withServer :: Spec -> Spec
-withServer = around_ $ \t -> do
-  (foundation, _logWare) <- setupApp
+withServerM :: ReaderT (TestApp App) WD () -> Expectation
+withServerM a = do
+  appTuple@(foundation, _logWare) <- setupApp
   app <- makeApplication foundation
   -- When using yesod-devel, reverse proxying is used for TLS. We need our own
   -- warp-tls server here.
@@ -43,8 +45,7 @@ withServer = around_ $ \t -> do
   bracket
     (fork $ runTLS myTlsSettings (setPort 3443 $ warpSettings foundation) app)
     killThread
-    (const t)
-
+    (const $ runSession defaultConfig $ finallyClose $ runReaderT a appTuple)
 
 setupApp :: IO (TestApp App)
 setupApp = do
