@@ -2,7 +2,7 @@ $("#demoForm").submit(function (ev) {
     ev.preventDefault();
     $.ajax({
         method: "POST",
-        url: "/demoForm",
+        url: "@{DemoFormR}",
         data: $(this).serializeArray()
     })
 })
