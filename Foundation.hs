@@ -72,7 +72,10 @@ instance Yesod App where
         -- value passed to hamletToRepHtml cannot be a widget, this allows
         -- you to use normal widget features in default-layout.
 
-        pc <- widgetToPageContent $(widgetFile "default-layout")
+        pc <- widgetToPageContent $ do
+          addStylesheet $ StaticR bootstrap_css_bootstrap_min_css
+          addScript $ StaticR bootstrap_js_bootstrap_min_js
+          $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
