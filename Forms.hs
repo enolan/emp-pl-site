@@ -4,6 +4,7 @@ module Forms where
 import Import
 
 import Data.Time.Format (parseTimeM)
+import Yesod.Form.Bootstrap3
 
 yearField :: Field Handler UTCTime
 yearField = Field
@@ -16,3 +17,19 @@ yearField = Field
   , fieldView = \idAttr nameAttr otherAttrs _eResult _req ->
      [whamlet|<input id=#{idAttr} name=#{nameAttr} *{otherAttrs} type=text>|]
   , fieldEnctype = UrlEncoded}
+
+bfs' :: Text -> FieldSettings App
+bfs' = bfs
+
+bsBoolField :: (Monad m, RenderMessage (HandlerSite m) FormMessage) => Field m Bool
+bsBoolField = boolField {fieldView =
+  \_theId name attrs val _isReq -> [whamlet|
+$newline never
+<span .bool-container>
+  <label .radio-inline>
+    <input type=radio name=#{name} value=yes :showVal id val:checked>
+    _{MsgBoolYes}
+  <label .radio-inline>
+    <input type=radio name=#{name} value=yes :showVal not val:checked>
+    _{MsgBoolNo}|]}
+  where showVal = either (\_ -> False)

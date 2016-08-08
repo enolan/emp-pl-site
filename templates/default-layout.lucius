@@ -1,11 +1,3 @@
-body {
-    display: flex;
-    justify-content: center
-}
-.container {
-    max-width: 50em
-}
-#message {
-    background-color: lightgrey;
-    padding: 0.5em
+span.bool-container {
+  margin-left: 1em
 }

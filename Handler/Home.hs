@@ -4,6 +4,7 @@ import Import
 
 import Data.CountryCodes
 import Forms
+import Yesod.Form.Bootstrap3
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -38,18 +39,18 @@ Great, you're logged in as #{userEmail $ entityVal userEnt}. Not you?
           [whamlet|
 We need some quick demographic information before we start:
 <form id=demoForm>
-  ^{formW}
-  <input type=submit value="Submit">|]
+  ^{formW}|]
 
 countryField :: Field Handler CountryCode
 countryField = selectFieldList countryList
 
 userForm :: Form (UTCTime, Text, CountryCode, Bool)
-userForm = renderDivs $ (,,,) <$>
-  areq yearField "Year of birth" Nothing <*>
-  areq textField "Gender" Nothing <*>
-  areq countryField "Country of residence" Nothing <*>
-  areq boolField "Are you a computer programmer?" Nothing
+userForm = renderBootstrap3 BootstrapBasicForm $ (,,,) <$>
+  areq yearField (bfs' "Year of birth") Nothing <*>
+  areq textField (bfs' "Gender") Nothing <*>
+  areq countryField (bfs' "Country of residence") Nothing <*>
+  areq bsBoolField (bfs' "Are you a computer programmer?") Nothing <*
+  bootstrapSubmit ("Submit" :: BootstrapSubmit Text)
 
 postDemoFormR :: Handler Value
 postDemoFormR = do

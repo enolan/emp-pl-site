@@ -2,11 +2,15 @@ $doctype 5
 <html>
   <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>#{pageTitle pc}
     ^{pageHead pc}
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.0.3/js.cookie.min.js">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
     <script>
       /* The `defaultCsrfMiddleware` Middleware added in Foundation.hs adds a CSRF token the request cookies. */
@@ -27,13 +31,15 @@ $doctype 5
       }
 
   <body>
-    <div class="container">
-      <header>
-      <div id="main" role="main">
-        ^{pageBody pc}
-      <footer>
-        Software Quality Causes Project by <a href="http://echonolan.net">Echo Nolan</a>. 
-        Check out the source on <a href="https://github.com/enolan/emp-pl-site">GitHub</a>.
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+          <header>
+          <div id="main" role="main">
+            ^{pageBody pc}
+          <footer>
+            <div>Software Quality Causes Project by <a href="http://echonolan.net">Echo Nolan</a>. 
+            <div>Check out the source on <a href="https://github.com/enolan/emp-pl-site">GitHub</a>.
 
     $maybe analytics <- appAnalytics $ appSettings master
       <script>
