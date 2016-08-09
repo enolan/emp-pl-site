@@ -39,7 +39,8 @@ Great, you're logged in as #{userEmail $ entityVal userEnt}. Not you?
           [whamlet|
 We need some quick demographic information before we start:
 <form id=demoForm>
-  ^{formW}|]
+  ^{formW}
+  <.error-container>|]
 
 countryField :: Field Handler CountryCode
 countryField = selectFieldList countryList
@@ -56,8 +57,6 @@ postDemoFormR :: Handler Value
 postDemoFormR = do
   ((formData, _), _) <- runFormPost $ userForm
   mauth <- maybeAuth
-  $(logDebug) $ pack $ show formData
-  $(logDebug) $ pack $ show mauth
   case formData of
     FormSuccess (birthYear, gender, residence, programmer) ->
       case mauth of

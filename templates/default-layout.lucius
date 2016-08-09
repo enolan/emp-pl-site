@@ -1,3 +1,7 @@
 span.bool-container {
-  margin-left: 1em
+  margin-left: 1em;
+}
+div.error-container {
+  display: none;
+  border: 1px solid red;
 }

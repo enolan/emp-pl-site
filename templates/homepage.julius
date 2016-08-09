@@ -1,8 +1,27 @@
 $("#demoForm").submit(function (ev) {
     ev.preventDefault();
+
+    submitBtn = getSubmitBtn();
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "Hold on a sec..."
+
     $.ajax({
         method: "POST",
         url: "@{DemoFormR}",
-        data: $(this).serializeArray()
+        data: $(this).serializeArray(),
+        error: function (jqXHR, textStatus, errorThrown){
+            submitBtn = getSubmitBtn();
+            submitBtn.innerHTML = "Oh no, something went wrong!";
+            errorBox = $("#demoForm .error-container")[0];
+            errorBox.style.display = "block";
+            errorBox.innerHTML = errorThrown;
+        },
+        success: function (data, textStatus, jqxhr){
+            getSubmitBtn().innerHTML = "Hooray!";
+        }
     })
 })
+
+function getSubmitBtn () {
+    return $("#demoForm button[type=submit]")[0];
+}
