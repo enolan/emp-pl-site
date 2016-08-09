@@ -14,8 +14,8 @@ yearField = Field
         Right time -> return $ Just time
       [] -> return $ Right Nothing
       _  -> return $ Left "too many years"
-  , fieldView = \idAttr nameAttr otherAttrs _eResult _req ->
-     [whamlet|<input id=#{idAttr} name=#{nameAttr} *{otherAttrs} type=text>|]
+  , fieldView = \idAttr nameAttr otherAttrs _eResult req ->
+     [whamlet|<input id=#{idAttr} name=#{nameAttr} *{otherAttrs} :req:required type=text>|]
   , fieldEnctype = UrlEncoded}
 
 bfs' :: Text -> FieldSettings App
@@ -23,13 +23,13 @@ bfs' = bfs
 
 bsBoolField :: (Monad m, RenderMessage (HandlerSite m) FormMessage) => Field m Bool
 bsBoolField = boolField {fieldView =
-  \_theId name attrs val _isReq -> [whamlet|
+  \_theId name _attrs val req -> [whamlet|
 $newline never
 <span .bool-container>
   <label .radio-inline>
-    <input type=radio name=#{name} value=yes :showVal id val:checked>
+    <input type=radio name=#{name} value=yes :showVal id val:checked :req:required>
     _{MsgBoolYes}
   <label .radio-inline>
-    <input type=radio name=#{name} value=yes :showVal not val:checked>
+    <input type=radio name=#{name} value=yes :showVal not val:checked :req:required>
     _{MsgBoolNo}|]}
   where showVal = either (\_ -> False)
