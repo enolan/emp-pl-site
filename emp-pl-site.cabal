@@ -24,12 +24,13 @@ library
                      Settings.StaticFiles
                      Handler.Common
                      Handler.Home
+                     Handler.ProgramForm
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
         ghc-options:   -Wall -fwarn-tabs -O0 -fdefer-typed-holes
     else
-        ghc-options:   -Wall -fwarn-tabs -O2
+        ghc-options:   -Wall -fwarn-tabs -O2 -fdefer-typed-holes
 
     extensions: TemplateHaskell
                 QuasiQuotes
@@ -88,6 +89,7 @@ library
                  , case-insensitive
                  , wai
                  , country-codes
+                 , random
 
 executable         emp-pl-site
     if flag(library-only)
