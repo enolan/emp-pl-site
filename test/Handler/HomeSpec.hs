@@ -64,14 +64,15 @@ selectDropdownByLabel label optionName = do
   targetOption <- findChildByLabelF label "option" (\el -> (== optionName) <$> WD.getText el)
   WD.click targetOption
 
-selectRadioByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Text -> m ()
-selectRadioByLabel labelText optionName = do
+selectBoolByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Bool -> m ()
+selectBoolByLabel labelText value = do
   labels <- filterM (\el -> (==labelText) <$> WD.getText el) =<<
     WD.findElems (WD.ByTag "label")
-  fors <- catMaybes <$> mapM (`WD.attr` "for") labels
-  liftIO $ fors `shouldSatisfy` ((==1) . length)
-  targetButton <- WD.findElem $ WD.ById (headEx fors <> "-" <> optionName)
-  WD.click targetButton
+  liftIO $ labels `shouldSatisfy` ((==1) . length)
+  formGroup <- WD.findElemFrom (headEx labels) $ WD.ByXPath ".."
+  let target = if value then "yes" else "no"
+  button <- WD.findElemFrom formGroup $ WD.ByCSS $ "input[value=" <> target <> "]"
+  WD.click button
 
 spec :: Spec
 spec = describe "homepage" $ do
@@ -87,7 +88,7 @@ spec = describe "homepage" $ do
     fillFieldByLabel "Year of birth" "1990"
     fillFieldByLabel "Gender" "male"
     selectDropdownByLabel "Country of residence" "United States"
-    selectRadioByLabel "Are you a computer programmer?" "yes"
+    selectBoolByLabel "Are you a computer programmer?" True
     WD.findElem (WD.ByTag "form") >>= WD.submit
     res <- runDB' $ count ([] :: [Filter UserDemographics])
     liftIO $ res `shouldBe` 1
