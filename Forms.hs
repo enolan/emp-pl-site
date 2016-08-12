@@ -30,6 +30,6 @@ $newline never
     <input type=radio name=#{name} value=yes :showVal id val:checked :req:required>
     _{MsgBoolYes}
   <label .radio-inline>
-    <input type=radio name=#{name} value=yes :showVal not val:checked :req:required>
+    <input type=radio name=#{name} value=no :showVal not val:checked :req:required>
     _{MsgBoolNo}|]}
   where showVal = either (\_ -> False)
