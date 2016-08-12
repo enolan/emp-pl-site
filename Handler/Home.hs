@@ -31,16 +31,24 @@ Don't worry, we'll keep your answers anonymous.|]
       [whamlet|
 Great, you're logged in as #{userEmail $ entityVal userEnt}. Not you?
 <a href=@{AuthR LogoutR}>Log out.</a>|]
-      mdemo <- handlerToWidget $ runDB $ getBy (UniqueAssociatedUser $ entityKey userEnt)
-      case mdemo of
-        Just _demoEnt -> [whamlet|Time to tell us about programs!|]
-        Nothing -> do
+      demoCount <- handlerToWidget $ runDB $ count
+        [Filter UserDemographicsUser (Left $ entityKey userEnt) Eq]
+      case demoCount of
+        1 -> ratingsBoxW False
+        0 -> do
           (formW, _encType) <- handlerToWidget $ generateFormPost userForm
           [whamlet|
 We need some quick demographic information before we start:
 <form id=demoForm>
   ^{formW}
   <.error-container>|]
+          ratingsBoxW True
+        _ -> error "impossible: more than one UserDemographics for a given user"
+
+ratingsBoxW :: Bool -> Widget
+ratingsBoxW hidden = [whamlet|
+<#ratingsBox :hidden:style="display: none">
+  SUP?|]
 
 countryField :: Field Handler CountryCode
 countryField = selectFieldList countryList

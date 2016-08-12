@@ -16,3 +16,12 @@ footer {
 .input-sm {
     margin-left: 20px
 }
+#demoForm {
+    transition: max-height 0.5s, opacity 0.5s;
+    overflow: hidden;
+    opacity: 1;
+    max-height: 40em;
+}
+#ratingsBox {
+    transition: opacity 0.5s;
+}

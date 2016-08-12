@@ -17,7 +17,9 @@ $("#demoForm").submit(function (ev) {
             errorBox.innerHTML = errorThrown;
         },
         success: function (data, textStatus, jqxhr){
-            getSubmitBtn().innerHTML = "Hooray!";
+            $("#demoForm").css({"max-height": "0em", "opacity": "0"});
+            $("#ratingsBox").css("display", "block")
+            $("#ratingsBox").addClass("fade in");
         }
     })
 })
