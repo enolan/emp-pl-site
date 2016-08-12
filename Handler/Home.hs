@@ -1,9 +1,9 @@
 module Handler.Home where
 
 import Import
+import Forms
 
 import Data.CountryCodes
-import Forms
 import Yesod.Form.Bootstrap3
 
 -- This is a handler function for the GET request method on the HomeR

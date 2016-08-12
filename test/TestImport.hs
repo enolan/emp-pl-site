@@ -3,19 +3,22 @@ module TestImport
     , module X
     ) where
 
-import Application           (makeApplication, makeFoundation, makeLogWare, warpSettings)
+import Application           (makeApplication, makeFoundation, makeLogWare,
+                              warpSettings)
+import Model                 as X
+import Settings              as X (AppSettings(..))
+
 import ClassyPrelude         as X hiding (delete, deleteBy)
 import Data.FileEmbed
 import Database.Persist      as X hiding (get)
-import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool, rawExecute, rawSql, unSingle, connEscapeName)
+import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool,
+                              rawExecute, rawSql, unSingle, connEscapeName)
 import Foundation            as X
 import Network.Wai.Handler.Warp (setPort)
 import Network.Wai.Handler.WarpTLS (tlsSettingsMemory, runTLS)
-import Model                 as X
 import Test.Hspec            as X
 import Test.WebDriver as WD
 import Text.Shakespeare.Text (st)
-import Settings              as X (AppSettings(..))
 import Yesod.Auth            as X (Route(..))
 import Yesod.Default.Config2 as X (useEnv, loadYamlSettings)
 import Yesod.Test            as X

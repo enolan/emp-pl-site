@@ -1,15 +1,16 @@
 module Foundation where
 
 import Import.NoFoundation
+
+import qualified Data.CaseInsensitive as CI
+import qualified Data.Text.Encoding as TE
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
 import Yesod.Auth.GoogleEmail2    (authGoogleEmail, forwardUrl)
-import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
-import qualified Data.CaseInsensitive as CI
-import qualified Data.Text.Encoding as TE
+import Yesod.Default.Util   (addStaticContentExternal)
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -54,12 +55,6 @@ instance Yesod App where
         120    -- timeout in minutes
         "config/client_session_key.aes"
 
-    -- Yesod Middleware allows you to run code before and after each handler function.
-    -- The defaultYesodMiddleware adds the response header "Vary: Accept, Accept-Language" and performs authorization checks.
-    -- Some users may also want to add the defaultCsrfMiddleware, which:
-    --   a) Sets a cookie with a CSRF token in it.
-    --   b) Validates that incoming write requests include that token in either a header or POST parameter.
-    -- For details, see the CSRF documentation in the Yesod.Core.Handler module of the yesod-core package.
     yesodMiddleware = sslOnlyMiddleware 120 . defaultCsrfMiddleware
 
     defaultLayout widget = do
@@ -180,7 +175,8 @@ instance RenderMessage App FormMessage where
 
 -- Useful when writing code that is re-usable outside of the Handler context.
 -- An example is background jobs that send email.
--- This can also be useful for writing code that works across multiple Yesod applications.
+-- This can also be useful for writing code that works across multiple Yesod
+-- applications.
 instance HasHttpManager App where
     getHttpManager = appHttpManager
 

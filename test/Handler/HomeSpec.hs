@@ -1,14 +1,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Handler.HomeSpec (spec) where
 
-import TestImport
+import           TestImport
 
-import Data.Maybe (fromJust)
-import System.IO.Unsafe (unsafePerformIO)
+import           Data.Maybe (fromJust)
+import           System.IO.Unsafe (unsafePerformIO)
 import qualified Test.WebDriver as WD
 import qualified Test.WebDriver.Class as WD
 import qualified Test.WebDriver.Commands.Wait as WDWait
-import Yesod.Core.Handler (RedirectUrl, toTextUrl)
+import           Yesod.Core.Handler (RedirectUrl, toTextUrl)
 
 mkUrl :: (MonadReader (TestApp App) m, MonadIO m, RedirectUrl App r) =>
   r -> m Text
@@ -46,7 +46,8 @@ findFieldByLabel str = do
 fillFieldByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Text -> m ()
 fillFieldByLabel label text = findFieldByLabel label >>= WD.sendKeys text
 
-findChildrenByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Text -> m [WD.Element]
+findChildrenByLabel :: (WD.WebDriver m, MonadIO m) =>
+  Text -> Text -> m [WD.Element]
 findChildrenByLabel label tagName = do
   parentEl <- findFieldByLabel label
   WD.findElemsFrom parentEl $ WD.ByTag tagName
@@ -61,7 +62,8 @@ findChildByLabelF label tagName f = do
 
 selectDropdownByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Text -> m ()
 selectDropdownByLabel label optionName = do
-  targetOption <- findChildByLabelF label "option" (\el -> (== optionName) <$> WD.getText el)
+  targetOption <- findChildByLabelF
+    label "option" (\el -> (== optionName) <$> WD.getText el)
   WD.click targetOption
 
 selectBoolByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Bool -> m ()
@@ -71,7 +73,8 @@ selectBoolByLabel labelText value = do
   liftIO $ labels `shouldSatisfy` ((==1) . length)
   formGroup <- WD.findElemFrom (headEx labels) $ WD.ByXPath ".."
   let target = if value then "yes" else "no"
-  button <- WD.findElemFrom formGroup $ WD.ByCSS $ "input[value=" <> target <> "]"
+  button <- WD.findElemFrom formGroup $
+    WD.ByCSS $ "input[value=" <> target <> "]"
   WD.click button
 
 spec :: Spec

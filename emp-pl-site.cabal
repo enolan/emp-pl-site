@@ -16,14 +16,14 @@ library
     exposed-modules: Application
                      Foundation
                      Forms
+                     Handler.Common
+                     Handler.Home
                      Import
                      Import.NoFoundation
                      Model
                      Model.CountryCodes
                      Settings
                      Settings.StaticFiles
-                     Handler.Common
-                     Handler.Home
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -31,64 +31,63 @@ library
     else
         ghc-options:   -Wall -fwarn-tabs -O2 -fdefer-typed-holes
 
-    extensions: TemplateHaskell
-                QuasiQuotes
-                OverloadedStrings
-                NoImplicitPrelude
-                MultiParamTypeClasses
-                TypeFamilies
-                GADTs
-                GeneralizedNewtypeDeriving
+    extensions: DeriveDataTypeable
+                DeriveGeneric
+                EmptyDataDecls
                 FlexibleContexts
                 FlexibleInstances
-                EmptyDataDecls
+                GADTs
+                GeneralizedNewtypeDeriving
+                MultiParamTypeClasses
+                NoImplicitPrelude
                 NoMonomorphismRestriction
-                DeriveDataTypeable
-                ViewPatterns
-                TupleSections
+                OverloadedStrings
+                QuasiQuotes
                 RecordWildCards
                 ScopedTypeVariables
-                DeriveGeneric
-
-    build-depends: base
+                TemplateHaskell
+                TupleSections
+                TypeFamilies
+                ViewPatterns
+    build-depends: aeson
+                 , base
+                 , bytestring
+                 , case-insensitive
+                 , classy-prelude
+                 , classy-prelude-conduit
+                 , classy-prelude-yesod
+                 , conduit
+                 , containers
+                 , country-codes
+                 , data-default
+                 , directory
+                 , fast-logger
+                 , file-embed
+                 , http-conduit
+                 , hjsmin
+                 , monad-control
+                 , monad-logger
+                 , persistent
+                 , persistent-postgresql
+                 , persistent-template
+                 , random
+                 , safe
+                 , shakespeare
+                 , template-haskell
+                 , text
+                 , time
+                 , unordered-containers
+                 , vector
+                 , wai
+                 , wai-extra
+                 , wai-logger
+                 , warp
+                 , yaml
                  , yesod
                  , yesod-core
                  , yesod-auth
                  , yesod-static
                  , yesod-form
-                 , classy-prelude
-                 , classy-prelude-conduit
-                 , classy-prelude-yesod
-                 , bytestring
-                 , text
-                 , persistent
-                 , persistent-postgresql
-                 , persistent-template
-                 , template-haskell
-                 , shakespeare
-                 , hjsmin
-                 , monad-control
-                 , wai-extra
-                 , yaml
-                 , http-conduit
-                 , directory
-                 , warp
-                 , data-default
-                 , aeson
-                 , conduit
-                 , monad-logger
-                 , fast-logger
-                 , wai-logger
-                 , file-embed
-                 , safe
-                 , unordered-containers
-                 , containers
-                 , vector
-                 , time
-                 , case-insensitive
-                 , wai
-                 , country-codes
-                 , random
 
 executable         emp-pl-site
     if flag(library-only)
@@ -109,41 +108,41 @@ test-suite test
     hs-source-dirs:    test
     ghc-options:       -Wall -fdefer-typed-holes
 
-    extensions: TemplateHaskell
-                QuasiQuotes
-                OverloadedStrings
-                NoImplicitPrelude
-                CPP
-                MultiParamTypeClasses
-                TypeFamilies
-                GADTs
-                GeneralizedNewtypeDeriving
+    extensions: CPP
+                DeriveDataTypeable
+                EmptyDataDecls
                 FlexibleContexts
                 FlexibleInstances
-                EmptyDataDecls
+                GADTs
+                GeneralizedNewtypeDeriving
+                MultiParamTypeClasses
+                NoImplicitPrelude
                 NoMonomorphismRestriction
-                DeriveDataTypeable
-                ViewPatterns
+                OverloadedStrings
+                QuasiQuotes
+                TemplateHaskell
                 TupleSections
+                TypeFamilies
+                ViewPatterns
 
-    build-depends: base
+  build-depends:   aeson
+                 , base
+                 , classy-prelude
+                 , classy-prelude-yesod
                  , emp-pl-site
-                 , yesod-auth
-                 , yesod-test
-                 , yesod-core
-                 , yesod
+                 , file-embed
+                 , hspec
+                 , hspec-webdriver
+                 , monad-logger
                  , persistent
                  , persistent-postgresql
                  , resourcet
-                 , monad-logger
                  , shakespeare
                  , transformers
-                 , hspec
-                 , hspec-webdriver
-                 , webdriver
-                 , classy-prelude
-                 , classy-prelude-yesod
-                 , aeson
                  , warp
                  , warp-tls
-                 , file-embed
+                 , webdriver
+                 , yesod
+                 , yesod-auth
+                 , yesod-core
+                 , yesod-test
