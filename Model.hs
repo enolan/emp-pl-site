@@ -8,9 +8,23 @@ import Database.Persist.Quasi
 
 import Model.CountryCodes()
 
--- You can define all of your database entities in the entities file.
--- You can find more information on persistent and how to declare entities
--- at:
--- http://www.yesodweb.com/book/persistent/
+data RatingSort = HighestScore | LowestScore | RandomSort
+  deriving (Eq, Read, Show)
+
+instance PathPiece RatingSort where
+  fromPathPiece = readMay
+  toPathPiece = tshow
+
+data HowMany = All | Some Int
+  deriving (Eq, Read, Show)
+
+instance PathPiece HowMany where
+  fromPathPiece txt = case readMay txt of
+    Just (i :: Int) -> Just $ Some i
+    Nothing -> case readMay txt of
+      Just All -> Just All
+      _ -> Nothing
+  toPathPiece = tshow
+
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")

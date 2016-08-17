@@ -6,3 +6,5 @@
 
 / HomeR GET
 /demoForm DemoFormR POST
+/rating RatingR POST
+/ratings/#RatingSort/#HowMany RatingsR GET

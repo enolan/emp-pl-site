@@ -18,6 +18,7 @@ library
                      Forms
                      Handler.Common
                      Handler.Home
+                     Handler.Ratings
                      Import
                      Import.NoFoundation
                      Model
@@ -61,6 +62,7 @@ library
                  , country-codes
                  , data-default
                  , directory
+                 , esqueleto
                  , fast-logger
                  , file-embed
                  , http-conduit
