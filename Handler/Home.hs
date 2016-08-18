@@ -15,35 +15,39 @@ import Yesod.Form.Bootstrap3
 -- inclined, or create a single monolithic file.
 getHomeR :: Handler Html
 getHomeR = do
+  mauth <- maybeAuth
+  whatDo <- case mauth of
+        Nothing -> return pleaseLoginW
+        Just userEnt -> do
+          demoCount <- runDB $
+            count [Filter UserDemographicsUser (Left $ entityKey userEnt) Eq]
+          (formW, _) <- generateFormPost demoForm
+          return $ do
+            loggedInW (entityVal userEnt)
+            case demoCount of
+              1 -> ratingsBoxW False
+              0 -> demoFormW formW >> ratingsBoxW True
+              _ -> error "impossible: more than one UserDemographics for a given user"
   defaultLayout $ do
     setTitle "Home"
     $(widgetFile "homepage")
 
-whatDo :: Widget
-whatDo = do
-  mauth <- handlerToWidget $ maybeAuth
-  case mauth of
-    Nothing ->
-      [whamlet|
-You need to <a href=@{AuthR LoginR}>log in via Google to participate.</a>
-Don't worry, we'll keep your answers anonymous.|]
-    Just userEnt -> do
-      [whamlet|
-Great, you're logged in as #{userEmail $ entityVal userEnt}. Not you?
-<a href=@{AuthR LogoutR}>Log out.</a>|]
-      demoCount <- handlerToWidget $ runDB $ count
-        [Filter UserDemographicsUser (Left $ entityKey userEnt) Eq]
-      case demoCount of
-        1 -> ratingsBoxW False
-        0 -> do
-          (formW, _encType) <- handlerToWidget $ generateFormPost userForm
-          [whamlet|
+pleaseLoginW :: Widget
+pleaseLoginW = [whamlet|
+  You need to <a href=@{AuthR LoginR}>log in via Google to participate.</a>
+  Don't worry, we'll keep your answers anonymous.|]
+
+loggedInW :: User -> Widget
+loggedInW u = [whamlet|
+  Great, you're logged in as #{userEmail u}. Not you?
+  <a href=@{AuthR LogoutR}>Log out.</a>|]
+
+demoFormW :: Widget -> Widget
+demoFormW innerForm = [whamlet|
 We need some quick demographic information before we start:
 <form id=demoForm>
-  ^{formW}
+  ^{innerForm}
   <.error-container>|]
-          ratingsBoxW True
-        _ -> error "impossible: more than one UserDemographics for a given user"
 
 ratingsBoxW :: Bool -> Widget
 ratingsBoxW hidden = [whamlet|
@@ -53,8 +57,8 @@ ratingsBoxW hidden = [whamlet|
 countryField :: Field Handler CountryCode
 countryField = selectFieldList countryList
 
-userForm :: Form (UTCTime, Text, CountryCode, Bool)
-userForm = renderBootstrap3 BootstrapBasicForm $ (,,,) <$>
+demoForm :: Form (UTCTime, Text, CountryCode, Bool)
+demoForm = renderBootstrap3 BootstrapBasicForm $ (,,,) <$>
   areq yearField (bfs' "Year of birth") Nothing <*>
   areq textField (bfs' "Gender") Nothing <*>
   areq countryField (bfs' "Country of residence") Nothing <*>
@@ -63,7 +67,7 @@ userForm = renderBootstrap3 BootstrapBasicForm $ (,,,) <$>
 
 postDemoFormR :: Handler Value
 postDemoFormR = do
-  ((formData, _), _) <- runFormPost $ userForm
+  ((formData, _), _) <- runFormPost $ demoForm
   mauth <- maybeAuth
   case formData of
     FormSuccess (birthYear, gender, residence, programmer) ->
