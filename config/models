@@ -12,5 +12,9 @@ UserDemographics
     deriving Typeable Show
 Rating
     user UserId
-    program Text
+    program ProgramId
     score Int
+    deriving Generic Show
+Program
+    name Text
+    deriving Generic Show

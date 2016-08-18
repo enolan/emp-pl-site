@@ -28,3 +28,6 @@ instance PathPiece HowMany where
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
+
+instance ToJSON Program
+instance ToJSON Rating
