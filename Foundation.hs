@@ -148,7 +148,7 @@ instance YesodAuth App where
     redirectToReferer _ = True
     authenticate creds = do
       let email = credsIdent creds
-          user = User email
+          user = User email False
       res <- runDB $ insertBy user
       pure $ Authenticated $ either entityKey id res
     -- You can add other plugins like Google Email, email or OAuth here

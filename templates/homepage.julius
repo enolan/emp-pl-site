@@ -24,6 +24,18 @@ $("#demoForm").submit(function (ev) {
     })
 })
 
+$("#explanationButton").click(function (ev) {
+    ev.preventDefault();
+
+    $("#explainBox").css({"max-height": "0em", "opacity": "0", "padding": "0em"});
+
+    $.ajax({
+        method: "POST",
+        url: "@{ExplainedR}"
+    })
+    // remove example ratings and make rating form live here
+})
+
 function getSubmitBtn () {
     return $("#demoForm button[type=submit]")[0];
 }

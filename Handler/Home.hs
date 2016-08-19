@@ -1,5 +1,6 @@
 module Handler.Home where
 
+import Handler.Ratings
 import Import
 import Forms
 
@@ -22,12 +23,16 @@ getHomeR = do
           demoCount <- runDB $
             count [Filter UserDemographicsUser (Left $ entityKey userEnt) Eq]
           (formW, _) <- generateFormPost demoForm
+          let explain = if userGotExplanation $ entityVal userEnt
+                then AlreadyExplained
+                else NeedsExplanation
           return $ do
             loggedInW (entityVal userEnt)
             case demoCount of
-              1 -> ratingsBoxW False
-              0 -> demoFormW formW >> ratingsBoxW True
-              _ -> error "impossible: more than one UserDemographics for a given user"
+              1 -> ratingsBoxW Visible explain []
+              0 -> demoFormW formW >> ratingsBoxW Hidden explain []
+              _ -> error
+                "impossible: more than one UserDemographics for a given user"
   defaultLayout $ do
     setTitle "Home"
     $(widgetFile "homepage")
@@ -44,14 +49,36 @@ loggedInW u = [whamlet|
 
 demoFormW :: Widget -> Widget
 demoFormW innerForm = [whamlet|
-We need some quick demographic information before we start:
 <form id=demoForm>
+  We need some quick demographic information before we start:
   ^{innerForm}
   <.error-container>|]
 
-ratingsBoxW :: Bool -> Widget
-ratingsBoxW hidden = [whamlet|
-<#ratingsBox :hidden:style="display: none">
+explainBoxW :: Widget
+explainBoxW = [whamlet|
+  <#explainBox .container-fluid>
+    <p>
+      For every program you rate, you get four points to spend however you like.
+      Giving something a rating costs as many points as the rating squared, so
+      rating something one costs one point, rating something two costs four
+      points and so on.
+    <p>
+      Feel free to play with the entries below, then hit the button to dismiss
+      this box and get started.
+    <button #explanationButton .btn .btn-md .btn-block .btn-default>Got it</button>|]
+
+data Hidden = Hidden | Visible
+hidden :: Hidden -> Bool
+hidden Hidden  = True
+hidden Visible = False
+
+data NeedsExplanation = NeedsExplanation | AlreadyExplained deriving Eq
+
+ratingsBoxW :: Hidden -> NeedsExplanation -> [Rating] -> Widget
+ratingsBoxW hide explain _ = [whamlet|
+<#ratingsBox :hidden hide:style="display: none">
+  $if explain == NeedsExplanation
+    ^{explainBoxW}
   SUP?|]
 
 countryField :: Field Handler CountryCode
@@ -65,7 +92,7 @@ demoForm = renderBootstrap3 BootstrapBasicForm $ (,,,) <$>
   areq bsBoolField (bfs' "Are you a computer programmer?") Nothing <*
   bootstrapSubmit ("Submit" :: BootstrapSubmit Text)
 
-postDemoFormR :: Handler Value
+postDemoFormR :: Handler ()
 postDemoFormR = do
   ((formData, _), _) <- runFormPost $ demoForm
   mauth <- maybeAuth
@@ -82,10 +109,10 @@ postDemoFormR = do
                             ,userDemographicsProgrammer = programmer}
           case res of
             Left _ -> invalidArgs ["User already has demographics"]
-            Right _ -> return $ toJSON $ PostDemoResponse True
+            Right _ -> return ()
     _ -> invalidArgs []
 
-data PostDemoResponse = PostDemoResponse {ok :: Bool}
-  deriving (Generic, Show)
-instance ToJSON PostDemoResponse
-instance FromJSON PostDemoResponse
+postExplainedR :: Handler ()
+postExplainedR = do
+  auth <- requireAuthId
+  runDB $ update auth [UserGotExplanation =. True]
