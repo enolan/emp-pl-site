@@ -79,7 +79,27 @@ ratingsBoxW hide explain _ = [whamlet|
 <#ratingsBox :hidden hide:style="display: none">
   $if explain == NeedsExplanation
     ^{explainBoxW}
-  SUP?|]
+  <table .table #ratings-table>
+    <thead>
+      <tr>
+        <td .rating-btn-col>
+        <td .program-name-col .program-name>Program name
+        <td .rating-btn-col>
+        <td .score-col>Score
+        <td .cost-col>Cost
+    <tbody>
+      <tr>
+        <td>
+          <button .btn-minus .btn-score>
+        <td .program-name>
+          <input class="program-name" type="text" placeholder="Terribleware 3">
+        <td>
+          <button .btn-plus .btn-score>
+        <td>
+          <span .score> -5
+        <td>
+          <span .cost> 25
+|]
 
 countryField :: Field Handler CountryCode
 countryField = selectFieldList countryList

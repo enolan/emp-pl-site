@@ -33,3 +33,48 @@ footer {
     overflow: hidden;
     max-height: 40em;
 }
+.btn-score {
+    width: 40px;
+    height: 40px;
+    padding: 0px;
+    border: 0px;
+    background-size: 100%;
+    border-radius: 4px;
+    text-align: center;
+}
+body:after {
+    position:absolute;
+    width:0;
+    height:0;
+    content: url("/static/images/minus-active.png") url("/static/images/plus-active.png");
+}
+.btn-minus {
+    background-image: url("/static/images/minus.png");
+}
+.btn-minus:active {
+    background-image: url("/static/images/minus-active.png");
+}
+.btn-plus {
+    background-image: url("/static/images/plus.png");
+}
+.btn-plus:active {
+    background-image: url("/static/images/plus-active.png");
+}
+#ratings-table {
+    table-layout: fixed;
+}
+#ratings-table td {
+    vertical-align: middle;
+}
+.rating-btn-col {
+    width: 56px;
+}
+.score-col {
+    width: 4em;
+}
+.cost-col {
+    width: 4em;
+}
+input.program-name {
+    width: 100%;
+}
