@@ -42,11 +42,13 @@ footer {
     border-radius: 4px;
     text-align: center;
 }
+/* preloader */
 body:after {
     position:absolute;
     width:0;
     height:0;
     content: url("/static/images/minus-active.png") url("/static/images/plus-active.png");
+    overflow: hidden;
 }
 .btn-minus {
     background-image: url("/static/images/minus.png");
