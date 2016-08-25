@@ -36,7 +36,7 @@ $doctype 5
           <div id="main" role="main">
             ^{pageBody pc}
           <footer>
-            <div>Software Quality Causes Project by <a href="http://echonolan.net">Echo Nolan</a>. 
+            <div>Software Quality Causes Project by <a href="http://echonolan.net">Echo Nolan</a>.
             <div>Check out the source on <a href="https://github.com/enolan/emp-pl-site">GitHub</a>.
 
     $maybe analytics <- appAnalytics $ appSettings master
