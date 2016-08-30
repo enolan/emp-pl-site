@@ -82,9 +82,10 @@ exampleRatings = [("terri.bl", -7), ("Tolerable Pro 3", 1), ("Shootymans 4", 5)]
 ratingsBoxW ::
   Hidden -> Maybe Ratings -> Widget
 ratingsBoxW hide mbRatings =
-  let ratingsList = maybe exampleRatings ratingsRatings mbRatings
+  let ratingsList = map addCost $ maybe exampleRatings ratingsRatings mbRatings
+      addCost (name, score) = (name, score, score ^ (2 :: Int))
       ptsSpent = maybe
-        (sum $ map ((^2) . snd) exampleRatings)
+        (sum $ map ((^(2::Int)) . snd) exampleRatings)
         ratingsPtsSpent
         mbRatings
       totalBudget = maybe
@@ -120,7 +121,7 @@ ratingsBoxW hide mbRatings =
         <td .cost-col>Cost
         <td .rating-btn-col>
     <tbody>
-      $forall (name, score) <- ratingsList
+      $forall (name, score, cost) <- ratingsList
         <tr>
           <td>
             <button .btn-minus .btn-score>
@@ -131,7 +132,7 @@ ratingsBoxW hide mbRatings =
           <td>
             <span .score>#{score}
           <td>
-            <span .cost>#{score ^ 2}
+            <span .cost>#{cost}
           <td>
             <button .btn-score .btn-delete>
 |]
