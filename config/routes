@@ -8,4 +8,3 @@
 /demoForm DemoFormR POST
 /explained ExplainedR POST
 /rating RatingR POST
-/ratings/#RatingSort/#HowMany RatingsR GET

@@ -18,4 +18,5 @@ Rating
     deriving Generic Show
 Program
     name Text
+    UniqueName name
     deriving Generic Show

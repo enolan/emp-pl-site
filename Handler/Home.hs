@@ -23,14 +23,14 @@ getHomeR = do
           demoCount <- runDB $
             count [Filter UserDemographicsUser (Left $ entityKey userEnt) Eq]
           (formW, _) <- generateFormPost demoForm
-          let explain = if userGotExplanation $ entityVal userEnt
-                then AlreadyExplained
-                else NeedsExplanation
+          ratings <- if userGotExplanation $ entityVal userEnt
+                then Just <$> getRatings
+                else return Nothing
           return $ do
             loggedInW (entityVal userEnt)
             case demoCount of
-              1 -> ratingsBoxW Visible explain []
-              0 -> demoFormW formW >> ratingsBoxW Hidden explain []
+              1 -> ratingsBoxW Visible ratings
+              0 -> demoFormW formW >> ratingsBoxW Hidden ratings
               _ -> error
                 "impossible: more than one UserDemographics for a given user"
   defaultLayout $ do
@@ -39,11 +39,13 @@ getHomeR = do
 
 pleaseLoginW :: Widget
 pleaseLoginW = [whamlet|
+<p>
   You need to <a href=@{AuthR LoginR}>log in via Google to participate.</a>
   Don't worry, we'll keep your answers anonymous.|]
 
 loggedInW :: User -> Widget
 loggedInW u = [whamlet|
+<p>
   Great, you're logged in as #{userEmail u}. Not you?
   <a href=@{AuthR LogoutR}>Log out.</a>|]
 
@@ -58,10 +60,10 @@ explainBoxW :: Widget
 explainBoxW = [whamlet|
   <#explainBox .container-fluid>
     <p>
-      For every program you rate, you get four points to spend however you like.
-      Giving something a rating costs as many points as the rating squared, so
-      rating something one costs one point, rating something two costs four
-      points and so on.
+      For every program you rate, you get twenty-five points to spend however
+      you like. Giving something a rating costs as many points as the rating
+      squared, so rating something one costs one point, rating something two
+      costs four points and so on.
     <p>
       Feel free to play with the entries below, then hit the button to dismiss
       this box and get started.
@@ -74,11 +76,40 @@ hidden Visible = False
 
 data NeedsExplanation = NeedsExplanation | AlreadyExplained deriving Eq
 
-ratingsBoxW :: Hidden -> NeedsExplanation -> [Rating] -> Widget
-ratingsBoxW hide explain _ = [whamlet|
+exampleRatings :: [(Text, Int)]
+exampleRatings = [("terri.bl", -7), ("Tolerable Pro 3", 1), ("Shootymans 4", 5)]
+
+ratingsBoxW ::
+  Hidden -> Maybe Ratings -> Widget
+ratingsBoxW hide mbRatings =
+  let ratingsList = maybe exampleRatings ratingsRatings mbRatings
+      ptsSpent = maybe
+        (sum $ map ((^2) . snd) exampleRatings)
+        ratingsPtsSpent
+        mbRatings
+      totalBudget = maybe
+        (length exampleRatings * 25)
+        ratingsTotalBudget
+        mbRatings
+      averageSpent =
+        tshow ((fromIntegral ptsSpent :: Float) / fromIntegral (length ratingsList))
+  in [whamlet|
 <#ratingsBox :hidden hide:style="display: none">
-  $if explain == NeedsExplanation
-    ^{explainBoxW}
+  $case mbRatings
+    $of Nothing
+      ^{explainBoxW}
+    $of Just _
+  <table .table .table-bordered #points-table>
+    <thead>
+      <tr>
+        <td>Total budget
+        <td>Points remaining
+        <td>Average spent per program
+    <tbody>
+      <tr>
+        <td #total-budget>#{totalBudget}
+        <td #available-points>#{totalBudget - ptsSpent}
+        <td #average-points-spent>#{averageSpent}
   <table .table #ratings-table>
     <thead>
       <tr>
@@ -87,18 +118,22 @@ ratingsBoxW hide explain _ = [whamlet|
         <td .rating-btn-col>
         <td .score-col>Score
         <td .cost-col>Cost
+        <td .rating-btn-col>
     <tbody>
-      <tr>
-        <td>
-          <button .btn-minus .btn-score>
-        <td .program-name>
-          <input class="program-name" type="text" placeholder="Terribleware 3">
-        <td>
-          <button .btn-plus .btn-score>
-        <td>
-          <span .score> -5
-        <td>
-          <span .cost> 25
+      $forall (name, score) <- ratingsList
+        <tr>
+          <td>
+            <button .btn-minus .btn-score>
+          <td .program-name>
+            <input class="program-name" type="text" value="#{name}" readonly>
+          <td>
+            <button .btn-plus .btn-score>
+          <td>
+            <span .score>#{score}
+          <td>
+            <span .cost>#{score ^ 2}
+          <td>
+            <button .btn-score .btn-delete>
 |]
 
 countryField :: Field Handler CountryCode

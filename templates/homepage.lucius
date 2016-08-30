@@ -47,7 +47,9 @@ body:after {
     position:absolute;
     width:0;
     height:0;
-    content: url("/static/images/minus-active.png") url("/static/images/plus-active.png");
+    content: url("/static/images/minus-active.png")
+             url("/static/images/plus-active.png")
+             url("/static/images/garbage-active.png");
     overflow: hidden;
 }
 .btn-minus {
@@ -61,6 +63,12 @@ body:after {
 }
 .btn-plus:active {
     background-image: url("/static/images/plus-active.png");
+}
+.btn-delete {
+    background-image: url("/static/images/garbage.png");
+}
+.btn-delete:active {
+    background-image: url("/static/images/garbage-active.png");
 }
 #ratings-table {
     table-layout: fixed;
@@ -77,6 +85,12 @@ body:after {
 .cost-col {
     width: 4em;
 }
+.delete-col {
+    width: 56px;
+}
 input.program-name {
     width: 100%;
+}
+#points-table {
+    text-align: center;
 }

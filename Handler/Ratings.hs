@@ -5,7 +5,10 @@ import Import
 import Database.Esqueleto hiding ((==.))
 import qualified Database.Esqueleto as E
 
-newtype Ratings = Ratings [Rating]
+data Ratings = Ratings
+  {ratingsRatings :: [(Text, Int)],
+   ratingsPtsSpent :: Int,
+   ratingsTotalBudget :: Int}
   deriving Generic
 
 instance ToJSON Ratings
@@ -17,28 +20,32 @@ instance ToTypedContent Ratings where
 postRatingR :: Handler ()
 postRatingR = return ()
 
-getRatingsRandom :: HowMany -> Handler [Rating]
-getRatingsRandom howmany = do
+getPoints :: Handler (Int,Int)
+getPoints = do
   uid <- requireAuthId
-  map entityVal <$> runDB (select $ from $
-      \rating -> do
-        where_ (val uid E.==. rating ^. RatingUser)
-        orderBy [rand]
-        case howmany of
-          All -> return ()
-          Some i -> limit (fromIntegral i)
-        return rating)
+  res <- runDB $
+    select $
+      from $ \rating -> do
+        where_ $ val uid E.==. (rating ^. RatingUser)
+        let score = rating ^. RatingScore
+            ratingCount = E.count score :: SqlExpr (E.Value Int)
+        return (sum_ $ score *. score, ratingCount *. val 25)
+ -- Postgres' SUM on bigints returns numeric which is interpreted as Rational
+  let ratToInt :: Rational -> Int
+      ratToInt x = floor (fromRational x :: Float)
+  case res of
+    [(Value (Just ptsSpent), Value totalPoints)] ->
+      return (ratToInt ptsSpent, totalPoints)
+    _ -> return (0, 0)
 
-getRatingsR :: RatingSort -> HowMany -> Handler Ratings
-getRatingsR RandomSort howmany = Ratings <$> getRatingsRandom howmany
-getRatingsR rsort      howmany = do
+getRatings :: Handler Ratings
+getRatings = do
   uid <- requireAuthId
-  Ratings . map entityVal <$> runDB (
-    selectList [RatingUser ==. uid] (
-      (case rsort of
-          HighestScore -> Desc RatingScore
-          LowestScore  -> Asc  RatingScore
-          RandomSort   -> error "impossible: RandomSort in getRatingsR") :
-       case howmany of
-          All -> []
-          Some i -> [LimitTo i]))
+  ratingsRatings <- map (\(Value a, Value b) -> (a, b)) <$> runDB (
+    select $
+      from $ \(rating `InnerJoin` program) -> do
+        E.on (rating ^. RatingProgram E.==. program ^. ProgramId)
+        where_ (rating ^. RatingUser E.==. val uid)
+        return (program ^. ProgramName, rating ^. RatingScore))
+  (ratingsPtsSpent, ratingsTotalBudget) <- getPoints
+  return Ratings{..}
