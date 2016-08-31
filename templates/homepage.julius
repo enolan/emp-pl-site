@@ -43,6 +43,38 @@ $("#explanationButton").click(function (ev) {
     setPtsTable(0, 0);
 })
 
+function handleProgramNameChange (ev) {
+    ev.target.setAttribute("readonly", "true");
+    let el =
+        $("<tr>")
+        .append($("<td>")
+                .append($("<button>")
+                        .addClass("btn-minus btn-score")))
+        .append($("<td>")
+                .addClass("program-name")
+                .append($("<input>")
+                        .addClass("program-name")
+                        .attr("type", "text")
+                        .change(handleProgramNameChange)))
+        .append($("<td>")
+                .append($("<button>")
+                        .addClass("btn-plus btn-score")))
+        .append($("<td>")
+                .append($("<span>")
+                        .text("0")
+                        .addClass("score")))
+        .append($("<td>")
+                .append($("<span>")
+                        .text("0")
+                        .addClass("cost")))
+        .append($("<td>")
+                .append($("<button>")
+                        .addClass("btn-score btn-delete")));
+    $("#ratings-table tr").last().after(el);
+}
+
+$("input.program-name:not([readonly])").change(handleProgramNameChange);
+
 function getSubmitBtn () {
     return $("#demoForm button[type=submit]")[0];
 }
