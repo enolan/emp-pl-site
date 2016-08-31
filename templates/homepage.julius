@@ -24,6 +24,11 @@ $("#demoForm").submit(function (ev) {
     })
 })
 
+function setPtsTable(totalBudget, pointsRemaining) {
+    $("#total-budget").text(totalBudget);
+    $("#available-points").text(pointsRemaining);
+}
+
 $("#explanationButton").click(function (ev) {
     ev.preventDefault();
 
@@ -32,8 +37,10 @@ $("#explanationButton").click(function (ev) {
     $.ajax({
         method: "POST",
         url: "@{ExplainedR}"
-    })
-    // remove example ratings and make rating form live here
+    });
+    /* up two is the <tr> */
+    $("input.program-name[readonly]").parent().parent().remove();
+    setPtsTable(0, 0);
 })
 
 function getSubmitBtn () {
