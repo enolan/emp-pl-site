@@ -94,3 +94,6 @@ input.program-name {
 #points-table {
     text-align: center;
 }
+.program-name[readonly] {
+    background-color: lightgrey;
+}

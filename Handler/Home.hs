@@ -75,8 +75,11 @@ exampleRatings = [("terri.bl", -7), ("Tolerable Pro 3", 1), ("Shootymans 4", 5)]
 ratingsBoxW ::
   Hidden -> Maybe Ratings -> Widget
 ratingsBoxW hide mbRatings =
-  let ratingsList = map addCost $ maybe exampleRatings ratingsRatings mbRatings
-      addCost (name, score) = (name, score, score ^ (2 :: Int))
+  let ratingsList =
+        (map addCostAndEditable $ maybe exampleRatings ratingsRatings mbRatings)
+        ++
+        [("", 0, 0, True)] -- blank line for new entries
+      addCostAndEditable (name, score) = (name, score, score ^ (2 :: Int), False)
       ptsSpent = maybe
         (sum $ map ((^(2::Int)) . snd) exampleRatings)
         ratingsPtsSpent
@@ -114,12 +117,12 @@ ratingsBoxW hide mbRatings =
         <td .cost-col>Cost
         <td .rating-btn-col>
     <tbody>
-      $forall (name, score, cost) <- ratingsList
+      $forall (name, score, cost, editable) <- ratingsList
         <tr>
           <td>
             <button .btn-minus .btn-score>
           <td .program-name>
-            <input class="program-name" type="text" value="#{name}" readonly>
+            <input class="program-name" type="text" value="#{name}" :not editable:readonly>
           <td>
             <button .btn-plus .btn-score>
           <td>
