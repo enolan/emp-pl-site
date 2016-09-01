@@ -4,7 +4,6 @@ module Handler.HomeSpec (spec) where
 import           TestImport
 
 import           Data.Maybe (fromJust)
-import           System.IO.Unsafe (unsafePerformIO)
 import qualified Test.WebDriver as WD
 import qualified Test.WebDriver.Class as WD
 import qualified Test.WebDriver.Commands.Wait as WDWait
@@ -18,14 +17,6 @@ openRoute ::
   (MonadReader (TestApp App) m, MonadIO m,
    RedirectUrl App a, WD.WebDriver m) => a -> m ()
 openRoute r = (unpack <$> mkUrl r) >>= WD.openPage
-
-{-# NOINLINE settings #-}
-settings :: AppSettings
-settings = unsafePerformIO $
-  loadYamlSettings
-  ["config/test-settings.yml", "config/settings.yml"]
-  []
-  useEnv
 
 isClickable :: WD.WebDriver m => WD.Element -> m Bool
 isClickable el = (&&) <$> displayed <*> enabled
@@ -105,6 +96,7 @@ login = do
       liftIO $ loginHref `shouldBe` Just authUrl
       WD.click loginLink
       emailField <- WD.findElem $ WD.ById "Email"
+      settings <- (appSettings . fst) <$> ask
       WD.sendKeys (fromJust $ googleUser settings) emailField
       nextButton <- WD.findElem $ WD.ById "next"
       WD.click nextButton
