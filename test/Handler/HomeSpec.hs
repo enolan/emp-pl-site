@@ -75,7 +75,7 @@ spec = describe "homepage" $ do
   it "lets you log in" $ withServerM $ do
       login
       -- Just check it exists
-      _demoForm <- WD.findElem $ WD.ById "demoForm"
+      _demoForm <- wait $ WD.findElem $ WD.ById "demoForm"
       return ()
   it "lets you enter demographic information" $ withServerM $ do
     login
