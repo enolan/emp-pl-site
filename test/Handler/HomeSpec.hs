@@ -68,6 +68,11 @@ selectBoolByLabel labelText value = do
     WD.ByCSS $ "input[value=" <> target <> "]"
   WD.click button
 
+assertDoesNotExist :: (WD.WebDriver m, MonadIO m) => WD.Selector -> m ()
+assertDoesNotExist selector = do
+  els <- WD.findElems selector
+  liftIO $ length els `shouldBe` 0
+
 spec :: Spec
 spec = describe "homepage" $ do
   it "loads the homepage" $ withServerM $
@@ -79,13 +84,24 @@ spec = describe "homepage" $ do
       return ()
   it "lets you enter demographic information" $ withServerM $ do
     login
-    fillFieldByLabel "Year of birth" "1990"
-    fillFieldByLabel "Gender" "male"
-    selectDropdownByLabel "Country of residence" "United States"
-    selectBoolByLabel "Are you a computer programmer?" True
-    WD.findElem (WD.ByTag "form") >>= WD.submit
+    enterDemo
     res <- runDB' $ count ([] :: [Filter UserDemographics])
     liftIO $ res `shouldBe` 1
+  it "lets you dismiss the explanation" $ withServerM $ do
+    login
+    enterDemo
+    let explainBox = WD.ById "explainBox"
+        readOnlyPrograms = WD.ByCSS "input.program-name[readonly]"
+        blankProgram = WD.ByCSS "input.program-name:not([readonly])"
+        explanationButton = WD.ById "explanationButton"
+    _explanationBox <- WD.findElem explainBox
+    examplePrograms <- WD.findElems readOnlyPrograms
+    liftIO $ length examplePrograms `shouldBe` 3
+    blankPrograms <- WD.findElems blankProgram
+    liftIO $ length blankPrograms `shouldBe` 1
+    WD.findElem explanationButton >>= WD.click
+    assertDoesNotExist explainBox
+    assertDoesNotExist readOnlyPrograms
 
 login :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
 login = do
@@ -107,3 +123,11 @@ login = do
       approveButton <- WD.findElem $ WD.ById "submit_approve_access"
       wait $ WDWait.expect =<< isClickable approveButton
       WD.click approveButton
+
+enterDemo :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
+enterDemo = do
+    fillFieldByLabel "Year of birth" "1990"
+    fillFieldByLabel "Gender" "male"
+    selectDropdownByLabel "Country of residence" "United States"
+    selectBoolByLabel "Are you a computer programmer?" True
+    WD.findElem (WD.ByTag "form") >>= WD.submit
