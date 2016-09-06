@@ -94,13 +94,13 @@ spec = describe "homepage" $ do
         readOnlyPrograms = WD.ByCSS "input.program-name[readonly]"
         blankProgram = WD.ByCSS "input.program-name:not([readonly])"
         explanationButton = WD.ById "explanationButton"
-    _explanationBox <- WD.findElem explainBox
+    explanationBox <- WD.findElem explainBox
     examplePrograms <- WD.findElems readOnlyPrograms
     liftIO $ length examplePrograms `shouldBe` 3
     blankPrograms <- WD.findElems blankProgram
     liftIO $ length blankPrograms `shouldBe` 1
     WD.findElem explanationButton >>= WD.click
-    assertDoesNotExist explainBox
+    wait $ WDWait.expect =<< WD.isDisplayed explanationBox
     assertDoesNotExist readOnlyPrograms
 
 login :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
