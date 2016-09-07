@@ -15,6 +15,7 @@ Rating
     user UserId
     program ProgramId
     score Int
+    UniqueUserProgramPair user program
     deriving Generic Show
 Program
     name Text

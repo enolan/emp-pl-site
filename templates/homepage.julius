@@ -115,6 +115,11 @@ function handleProgramNameChange (ev) {
     $(ev.target).parent().parent().find("button.btn-score")
         .click(handleScoreButton);
     updatePointsTable(el);
+    $.ajax({
+        method: "POST",
+        url: "@{RatingR}",
+        data: {action: "new", prgmName: $(ev.target).val(), prgmScore: 0}
+    })
     $("#ratings-table tr").last().after(el);
 }
 

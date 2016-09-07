@@ -2,7 +2,7 @@ module Handler.Ratings where
 
 import Import
 
-import Database.Esqueleto hiding ((==.))
+import Database.Esqueleto hiding ((=.),(==.))
 import qualified Database.Esqueleto as E
 
 data Ratings = Ratings
@@ -18,7 +18,26 @@ instance ToTypedContent Ratings where
   toTypedContent = toTypedContent . toJSON
 
 postRatingR :: Handler ()
-postRatingR = return ()
+postRatingR = do
+  uid <- requireAuthId
+  mbAction <- lookupPostParam "action"
+  mbPrgmName <- lookupPostParam "prgmName"
+  mbPrgmScore <- lookupPostParam "prgmScore"
+  case (mbAction, mbPrgmName, mbPrgmScore) of
+    (Just action, Just prgmName, Just prgmScore) ->
+      case readMay prgmScore of
+        Just prgmScore' -> do
+          programRes <- runDB $ insertBy
+            Program {programName = prgmName}
+          let programKey = either entityKey id programRes
+          ratingRes <- runDB $ upsert
+            Rating
+             {ratingUser = uid, ratingProgram = programKey,
+              ratingScore = prgmScore'}
+            [RatingScore =. prgmScore']
+          pure ()
+        Nothing -> invalidArgs []
+    _ -> invalidArgs []
 
 getPoints :: Handler (Int,Int)
 getPoints = do
