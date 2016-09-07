@@ -24,15 +24,57 @@ $("#demoForm").submit(function (ev) {
     })
 })
 
-function setPtsTable(totalBudget, pointsRemaining) {
-    $("#total-budget").text(totalBudget);
-    $("#available-points").text(pointsRemaining);
+function updatePointsTable(prgmScoreEl) {
+    let totalBudgetEl = $("#total-budget");
+    let availablePointsEl = $("#available-points");
+    let averagePointsEl = $("#average-points-spent");
+    let scores = $("#ratings-table input.program-name[readonly]")
+        .parent().parent().find("span.score").map(
+            function (idx, el) {return el.textContent;});
+
+    let pointsSpent = 0;
+    let totalScore = 0;
+    for (score of scores.get()) {
+        pointsSpent += score * score;
+        totalScore += score;
+    }
+
+    let totalBudget = scores.length * 25
+    let availablePoints = totalBudget - pointsSpent;
+    totalBudgetEl.text(totalBudget);
+    availablePointsEl.text(availablePoints);
+    if (scores.length > 0) {
+        averagePointsEl.text(pointsSpent/scores.length);
+    } else {
+        averagePointsEl.text("N/A");
+    }
+    if (availablePoints < 0) {
+        availablePointsEl.css("background", "red");
+        prgmScoreEl.css("background", "red");
+        $(".btn-score:not(.btn-delete)").prop("disabled", true);
+        window.setTimeout(function () {
+            let prgmScore = Number.parseInt(prgmScoreEl.text());
+            if (prgmScore > 0) {
+                prgmScoreEl.text(prgmScore - 1);
+            } else {
+                prgmScoreEl.text(prgmScore + 1);
+            }
+            updatePointsTable(prgmScoreEl);
+        }, 500)
+        return false;
+    } else {
+        availablePointsEl.css("background", "none");
+        prgmScoreEl.css("background", "none");
+        $(".btn-score:not(.btn-delete)").prop("disabled", false);
+        return true;
+    }
 }
 
 $("#explanationButton").click(function (ev) {
     ev.preventDefault();
 
-    $("#explainBox").css({"max-height": "0em", "opacity": "0", "padding": "0em"});
+    $("#explainBox").
+        css({"max-height": "0em", "opacity": "0", "padding": "0em"});
 
     $.ajax({
         method: "POST",
@@ -40,7 +82,7 @@ $("#explanationButton").click(function (ev) {
     });
     /* up two is the <tr> */
     $("input.program-name[readonly]").parent().parent().remove();
-    setPtsTable(0, 0);
+    zeroPointsTable();
 })
 
 function handleProgramNameChange (ev) {
@@ -70,10 +112,53 @@ function handleProgramNameChange (ev) {
         .append($("<td>")
                 .append($("<button>")
                         .addClass("btn-score btn-delete")));
+    $(ev.target).parent().parent().find("button.btn-score")
+        .click(handleScoreButton);
+    updatePointsTable(el);
     $("#ratings-table tr").last().after(el);
 }
 
 $("input.program-name:not([readonly])").change(handleProgramNameChange);
+
+function handleScoreButton(ev) {
+    let tr = $(this.parentNode.parentNode);
+    let prgmName = tr.find("input.program-name").val();
+    let action = "";
+    let prgmScoreEl = tr.find("span.score");
+    let prgmScore = prgmScoreEl.text();
+    let prgmCostEl = tr.find("span.cost");
+    if($(this).hasClass("btn-plus")) {
+        action = "plus";
+    } else if ($(this).hasClass("btn-minus")) {
+        action = "minus";
+    } else if ($(this).hasClass("btn-delete")) {
+        action = "delete";
+    } else {
+        throw "score button with no valid class!";
+    }
+    switch (action) {
+    case "plus":
+        prgmScoreEl.text(++prgmScore);
+        break;
+    case "minus":
+        prgmScoreEl.text(--prgmScore);
+        break;
+    case "delete":
+        tr.remove();
+    }
+    prgmCostEl.text(prgmScore * prgmScore);
+    okay = updatePointsTable(prgmScoreEl);
+    if (okay) {
+        $.ajax({
+            method: "POST",
+            url: "@{RatingR}",
+            data: {action: action, prgmName: prgmName, prgmScore: prgmScore}
+        });
+    }
+}
+
+$("input.program-name[readonly]").parent().parent().find("button.btn-score").
+    click(handleScoreButton);
 
 function getSubmitBtn () {
     return $("#demoForm button[type=submit]")[0];
