@@ -24,13 +24,13 @@ postRatingR = do
   mbPrgmName <- lookupPostParam "prgmName"
   mbPrgmScore <- lookupPostParam "prgmScore"
   case (mbAction, mbPrgmName, mbPrgmScore) of
-    (Just action, Just prgmName, Just prgmScore) ->
+    (Just _action, Just prgmName, Just prgmScore) ->
       case readMay prgmScore of
         Just prgmScore' -> do
           programRes <- runDB $ insertBy
             Program {programName = prgmName}
           let programKey = either entityKey id programRes
-          ratingRes <- runDB $ upsert
+          _ratingRes <- runDB $ upsert
             Rating
              {ratingUser = uid, ratingProgram = programKey,
               ratingScore = prgmScore'}
