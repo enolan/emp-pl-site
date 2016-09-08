@@ -9,13 +9,14 @@ import Model                 as X
 import Settings              as X (AppSettings(..))
 
 import ClassyPrelude         as X hiding (delete, deleteBy)
+import Control.Concurrent.Async
 import Data.FileEmbed
 import Database.Persist      as X hiding (get)
 import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool,
                               rawExecute, rawSql, unSingle, connEscapeName)
 import Foundation            as X
-import Network.Wai.Handler.Warp (setPort)
-import Network.Wai.Handler.WarpTLS (tlsSettingsMemory, runTLS)
+import Network.Wai.Handler.Warp (setBeforeMainLoop, setPort)
+import Network.Wai.Handler.WarpTLS (TLSSettings(..), tlsSettingsMemory, runTLS)
 import Test.Hspec            as X
 import Test.WebDriver as WD
 import Text.Shakespeare.Text (st)
@@ -37,18 +38,24 @@ runDB' q = ask >>= \(app, _) -> liftIO $ runDBWithApp app q
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before setupApp
 
+myTlsSettings :: TLSSettings
+myTlsSettings = tlsSettingsMemory
+  $(embedFile "test/cert.crt") $(embedFile "test/key.pem")
+
 withServerM :: ReaderT (TestApp App) WD () -> Expectation
-withServerM a = do
-  appTuple@(foundation, _logWare) <- setupApp
+withServerM test = do
+  -- Start warp-tls, wait for it to be ready, run the test and let async kill
+  -- the server for us. If an exception is thrown by the server thread, make
+  -- sure it's rethrown in the test thread.
+  waitVar <- newEmptyMVar
+  appTuple@(foundation, _logWare) <- liftIO $ setupApp
   app <- makeApplication foundation
-  -- When using yesod-devel, reverse proxying is used for TLS. We need our own
-  -- warp-tls server here.
-  let myTlsSettings = tlsSettingsMemory
-        $(embedFile "test/cert.crt") $(embedFile "test/key.pem")
-  bracket
-    (fork $ runTLS myTlsSettings (setPort 3443 $ warpSettings foundation) app)
-    killThread
-    (const $ runSession defaultConfig $ finallyClose $ runReaderT a appTuple)
+  let warpSettings' = setBeforeMainLoop (putMVar waitVar ()) $ setPort 3443 $
+        warpSettings foundation
+  withAsync (runTLS myTlsSettings warpSettings' app) $ \a -> do
+    link a
+    takeMVar waitVar
+    runSession defaultConfig $ finallyClose $ runReaderT test appTuple
 
 setupApp :: IO (TestApp App)
 setupApp = do

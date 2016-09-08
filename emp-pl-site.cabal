@@ -129,6 +129,7 @@ test-suite test
                 ViewPatterns
 
   build-depends:   aeson
+                 , async
                  , base
                  , classy-prelude
                  , classy-prelude-yesod
