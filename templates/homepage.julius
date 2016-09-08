@@ -55,10 +55,12 @@ function updatePointsTable(prgmScoreEl) {
         window.setTimeout(function () {
             let prgmScore = Number.parseInt(prgmScoreEl.text());
             if (prgmScore > 0) {
-                prgmScoreEl.text(prgmScore - 1);
+                prgmScore--;
             } else {
-                prgmScoreEl.text(prgmScore + 1);
+                prgmScore++;
             }
+            prgmScoreEl.text(prgmScore);
+            prgmScoreEl.parent().parent().find("span.cost").text(prgmScore * prgmScore);
             updatePointsTable(prgmScoreEl);
         }, 500)
         return false;
