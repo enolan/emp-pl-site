@@ -5,6 +5,7 @@ import Import
 import Forms
 
 import Data.CountryCodes
+import Data.Double.Conversion.Text
 import Yesod.Form.Bootstrap3
 
 getHomeR :: Handler Html
@@ -89,7 +90,7 @@ ratingsBoxW hide mbRatings =
         ratingsTotalBudget
         mbRatings
       averageSpent =
-        tshow ((fromIntegral ptsSpent :: Float) / fromIntegral (length ratingsList))
+        toFixed 2 ((fromIntegral ptsSpent :: Double) / fromIntegral (length ratingsList))
   in [whamlet|
 <#ratingsBox :hidden hide:style="display: none">
   $case mbRatings

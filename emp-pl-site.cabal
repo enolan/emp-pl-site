@@ -62,6 +62,7 @@ library
                  , country-codes
                  , data-default
                  , directory
+                 , double-conversion
                  , esqueleto
                  , fast-logger
                  , file-embed

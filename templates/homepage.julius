@@ -44,7 +44,7 @@ function updatePointsTable(prgmScoreEl) {
     totalBudgetEl.text(totalBudget);
     availablePointsEl.text(availablePoints);
     if (scores.length > 0) {
-        averagePointsEl.text(pointsSpent/scores.length);
+        averagePointsEl.text((pointsSpent/scores.length).toFixed(2));
     } else {
         averagePointsEl.text("N/A");
     }
