@@ -83,7 +83,7 @@ $("#explanationButton").click(function (ev) {
     });
     /* up two is the <tr> */
     $("input.program-name[readonly]").parent().parent().remove();
-    zeroPointsTable();
+    updatePointsTable();
 })
 
 function handleProgramNameChange (ev) {
