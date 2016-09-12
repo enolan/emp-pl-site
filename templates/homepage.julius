@@ -1,7 +1,7 @@
 $("#demoForm").submit(function (ev) {
     ev.preventDefault();
 
-    submitBtn = getSubmitBtn();
+    let submitBtn = getSubmitBtn();
     submitBtn.disabled = true;
     submitBtn.innerHTML = "Hold on a sec..."
 
@@ -10,9 +10,8 @@ $("#demoForm").submit(function (ev) {
         url: "@{DemoFormR}",
         data: $(this).serializeArray(),
         error: function (jqXHR, textStatus, errorThrown){
-            submitBtn = getSubmitBtn();
             submitBtn.innerHTML = "Oh no, something went wrong!";
-            errorBox = $("#demoForm .error-container")[0];
+            let errorBox = $("#demoForm .error-container")[0];
             errorBox.style.display = "block";
             errorBox.innerHTML = errorThrown;
         },
@@ -34,7 +33,7 @@ function updatePointsTable(prgmScoreEl) {
 
     let pointsSpent = 0;
     let totalScore = 0;
-    for (score of scores.get()) {
+    for (let score of scores.get()) {
         pointsSpent += score * score;
         totalScore += score;
     }
@@ -154,7 +153,7 @@ function handleScoreButton(ev) {
         tr.remove();
     }
     prgmCostEl.text(prgmScore * prgmScore);
-    okay = updatePointsTable(prgmScoreEl);
+    let okay = updatePointsTable(prgmScoreEl);
     if (okay) {
         $.ajax({
             method: "POST",
