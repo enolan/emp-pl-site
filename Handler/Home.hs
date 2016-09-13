@@ -17,9 +17,7 @@ getHomeR = do
           demoCount <- runDB $
             count [Filter UserDemographicsUser (Left $ entityKey userEnt) Eq]
           (formW, _) <- generateFormPost demoForm
-          ratings <- if userGotExplanation $ entityVal userEnt
-                then Just <$> getRatings
-                else return Nothing
+          ratings <- getRatings
           return $ do
             loggedInW (entityVal userEnt)
             case demoCount of
@@ -73,30 +71,26 @@ data NeedsExplanation = NeedsExplanation | AlreadyExplained deriving Eq
 exampleRatings :: [(Text, Int)]
 exampleRatings = [("terri.bl", -7), ("Tolerable Pro 3", 1), ("Shootymans 4", 5)]
 
-ratingsBoxW ::
-  Hidden -> Maybe Ratings -> Widget
-ratingsBoxW hide mbRatings =
-  let ratingsList =
-        (map addCostAndEditable $ maybe exampleRatings ratingsRatings mbRatings)
+ratingsBoxW :: Hidden -> Ratings -> Widget
+ratingsBoxW hide Ratings{..} =
+  let noRatings = null ratingsRatings
+      ratingsList =
+        (map addCostAndEditable $ if noRatings then exampleRatings else ratingsRatings)
         ++
         [("", 0, 0, True)] -- blank line for new entries
       addCostAndEditable (name, score) = (name, score, score ^ (2 :: Int), False)
-      ptsSpent = maybe
-        (sum $ map ((^(2::Int)) . snd) exampleRatings)
-        ratingsPtsSpent
-        mbRatings
-      totalBudget = maybe
-        (length exampleRatings * 25)
-        ratingsTotalBudget
-        mbRatings
+      ptsSpent = if noRatings
+                 then (sum $ map ((^(2::Int)) . snd) exampleRatings)
+                 else ratingsPtsSpent
+      totalBudget = if noRatings
+                    then (length exampleRatings * 25)
+                    else ratingsTotalBudget
       averageSpent =
         toFixed 2 ((fromIntegral ptsSpent :: Double) / fromIntegral (length ratingsList))
   in [whamlet|
 <#ratingsBox :hidden hide:style="display: none">
-  $case mbRatings
-    $of Nothing
-      ^{explainBoxW}
-    $of Just _
+  $if noRatings
+    ^{explainBoxW}
   <table .table .table-bordered #points-table>
     <thead>
       <tr>
@@ -119,7 +113,7 @@ ratingsBoxW hide mbRatings =
         <td .rating-btn-col>
     <tbody>
       $forall (name, score, cost, editable) <- ratingsList
-        <tr>
+        <tr :not editable && noRatings:.example-data>
           <td>
             <button .btn-minus .btn-score>
           <td .program-name>
@@ -164,8 +158,3 @@ postDemoFormR = do
             Left _ -> invalidArgs ["User already has demographics"]
             Right _ -> return ()
     _ -> invalidArgs []
-
-postExplainedR :: Handler ()
-postExplainedR = do
-  auth <- requireAuthId
-  runDB $ update auth [UserGotExplanation =. True]

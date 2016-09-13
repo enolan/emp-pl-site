@@ -63,7 +63,7 @@ function updatePointsTable(prgmScoreEl) {
             updatePointsTable(prgmScoreEl);
         }, 500)
         return false;
-    } else {
+    } else if (prgmScoreEl !== undefined){
         availablePointsEl.css("background", "none");
         prgmScoreEl.css("background", "none");
         $(".btn-score:not(.btn-delete)").prop("disabled", false);
@@ -73,18 +73,16 @@ function updatePointsTable(prgmScoreEl) {
 
 $("#explanationButton").click(function (ev) {
     ev.preventDefault();
+    clearExampleData();
+})
 
+function clearExampleData() {
     $("#explainBox").
         css({"max-height": "0em", "opacity": "0", "padding": "0em"});
 
-    $.ajax({
-        method: "POST",
-        url: "@{ExplainedR}"
-    });
-    /* up two is the <tr> */
-    $("input.program-name[readonly]").parent().parent().remove();
+    $("#ratings-table .example-data").remove();
     updatePointsTable();
-})
+}
 
 function handleProgramNameChange (ev) {
     ev.target.setAttribute("readonly", "true");
@@ -115,13 +113,14 @@ function handleProgramNameChange (ev) {
                         .addClass("btn-score btn-delete")));
     $(ev.target).parent().parent().find("button.btn-score")
         .click(handleScoreButton);
+    clearExampleData();
+    $("#ratings-table").append(el);
     updatePointsTable(el);
     $.ajax({
         method: "POST",
         url: "@{RatingR}",
         data: {action: "new", prgmName: $(ev.target).val(), prgmScore: 0}
     })
-    $("#ratings-table tr").last().after(el);
 }
 
 $("input.program-name:not([readonly])").change(handleProgramNameChange);
@@ -154,7 +153,7 @@ function handleScoreButton(ev) {
     }
     prgmCostEl.text(prgmScore * prgmScore);
     let okay = updatePointsTable(prgmScoreEl);
-    if (okay) {
+    if (okay && !tr.hasClass("example-data")) {
         $.ajax({
             method: "POST",
             url: "@{RatingR}",

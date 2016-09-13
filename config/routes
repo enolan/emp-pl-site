@@ -6,5 +6,4 @@
 
 / HomeR GET
 /demoForm DemoFormR POST
-/explained ExplainedR POST
 /rating RatingR POST

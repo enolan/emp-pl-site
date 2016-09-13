@@ -123,6 +123,7 @@ test-suite test
                 NoMonomorphismRestriction
                 OverloadedStrings
                 QuasiQuotes
+                RecordWildCards
                 TemplateHaskell
                 TupleSections
                 TypeFamilies

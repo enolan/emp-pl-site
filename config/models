@@ -1,7 +1,6 @@
 User
     email Text
     UniqueEmail email
-    gotExplanation Bool
     deriving Typeable Show Eq
 UserDemographics
     user UserId
