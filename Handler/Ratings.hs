@@ -39,6 +39,18 @@ postRatingR = do
         Nothing -> invalidArgs []
     _ -> invalidArgs []
 
+deleteRatingR :: Handler ()
+deleteRatingR = do
+  uid <- requireAuthId
+  mbPrgmName <- lookupPostParam "prgmName"
+  case mbPrgmName of
+    Just prgmName -> runDB $ do
+      prgmId <- getBy (UniqueName prgmName)
+      case prgmId of
+        Just prgmEnt -> deleteBy (UniqueUserProgramPair uid (entityKey prgmEnt))
+        Nothing -> invalidArgs []
+    Nothing -> invalidArgs []
+
 getPoints :: Handler (Int,Int)
 getPoints = do
   uid <- requireAuthId

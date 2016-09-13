@@ -149,7 +149,15 @@ function handleScoreButton(ev) {
         prgmScoreEl.text(--prgmScore);
         break;
     case "delete":
+        if (!tr.hasClass("example-data")) {
+            $.ajax({
+                method: "DELETE",
+                url: "@{RatingR}",
+                data: {prgmName: prgmName}
+            });
+        }
         tr.remove();
+        return;
     }
     prgmCostEl.text(prgmScore * prgmScore);
     let okay = updatePointsTable(prgmScoreEl);
