@@ -74,34 +74,36 @@ assertDoesNotExist selector = do
   liftIO $ length els `shouldBe` 0
 
 spec :: Spec
-spec = describe "homepage" $ do
-  it "loads the homepage" $ withServerM $
-    openRoute HomeR
-  it "lets you log in" $ withServerM $ do
+spec = do
+  withApp $ describe "homepage (yesod-test)" $
+    it "loads the homepage" $
+      get HomeR
+  describe "homepage (selenium)" $ do
+    it "lets you log in" $ withServerM $ do
       login
       -- Just check it exists
       _demoForm <- wait $ WD.findElem $ WD.ById "demoForm"
       return ()
-  it "lets you enter demographic information" $ withServerM $ do
-    login
-    enterDemo
-    res <- runDB' $ count ([] :: [Filter UserDemographics])
-    liftIO $ res `shouldBe` 1
-  it "lets you dismiss the explanation" $ withServerM $ do
-    login
-    enterDemo
-    let explainBox = WD.ById "explainBox"
-        readOnlyPrograms = WD.ByCSS "input.program-name[readonly]"
-        blankProgram = WD.ByCSS "input.program-name:not([readonly])"
-        explanationButton = WD.ById "explanationButton"
-    explanationBox <- WD.findElem explainBox
-    examplePrograms <- WD.findElems readOnlyPrograms
-    liftIO $ length examplePrograms `shouldBe` 3
-    blankPrograms <- WD.findElems blankProgram
-    liftIO $ length blankPrograms `shouldBe` 1
-    WD.findElem explanationButton >>= WD.click
-    wait $ WDWait.expect =<< WD.isDisplayed explanationBox
-    assertDoesNotExist readOnlyPrograms
+    it "lets you enter demographic information" $ withServerM $ do
+      login
+      enterDemo
+      res <- runDB' $ count ([] :: [Filter UserDemographics])
+      liftIO $ res `shouldBe` 1
+    it "lets you dismiss the explanation" $ withServerM $ do
+      login
+      enterDemo
+      let explainBox = WD.ById "explainBox"
+          readOnlyPrograms = WD.ByCSS "input.program-name[readonly]"
+          blankProgram = WD.ByCSS "input.program-name:not([readonly])"
+          explanationButton = WD.ById "explanationButton"
+      explanationBox <- WD.findElem explainBox
+      examplePrograms <- WD.findElems readOnlyPrograms
+      liftIO $ length examplePrograms `shouldBe` 3
+      blankPrograms <- WD.findElems blankProgram
+      liftIO $ length blankPrograms `shouldBe` 1
+      WD.findElem explanationButton >>= WD.click
+      wait $ WDWait.expect =<< WD.isDisplayed explanationBox
+      assertDoesNotExist readOnlyPrograms
 
 login :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
 login = do
