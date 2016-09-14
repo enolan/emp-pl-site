@@ -109,7 +109,7 @@ test-suite test
                        Handler.HomeSpec
                        TestImport
     hs-source-dirs:    test
-    ghc-options:       -Wall -fdefer-typed-holes
+    ghc-options:       -Wall -fdefer-typed-holes -rtsopts
 
     extensions: CPP
                 DeriveDataTypeable
