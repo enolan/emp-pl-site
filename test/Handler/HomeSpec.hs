@@ -28,8 +28,8 @@ wait = WDWait.waitUntil 5
 
 findFieldByLabel :: (WD.WebDriver m, MonadIO m) => Text -> m WD.Element
 findFieldByLabel str = do
-  labels :: [WD.Element] <- filterM (\el -> (==str) <$> WD.getText el) =<<
-    WD.findElems (WD.ByTag "label")
+  labels <- WD.findElems $ WD.ByXPath $
+    "//label[text() = \"" <> str <> "\"]"
   els <- catMaybes <$> mapM (`WD.attr` "for") labels
   liftIO $ els `shouldSatisfy` ((==1) . length)
   WD.findElem $ WD.ById $ headEx els
@@ -37,25 +37,13 @@ findFieldByLabel str = do
 fillFieldByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Text -> m ()
 fillFieldByLabel label text = findFieldByLabel label >>= WD.sendKeys text
 
-findChildrenByLabel :: (WD.WebDriver m, MonadIO m) =>
-  Text -> Text -> m [WD.Element]
-findChildrenByLabel label tagName = do
-  parentEl <- findFieldByLabel label
-  WD.findElemsFrom parentEl $ WD.ByTag tagName
-
-findChildByLabelF :: (WD.WebDriver m, MonadIO m) =>
-  Text -> Text -> (WD.Element -> m Bool) -> m WD.Element
-findChildByLabelF label tagName f = do
-  children <- findChildrenByLabel label tagName
-  child <- filterM f children
-  liftIO $ child `shouldSatisfy` ((==1) . length)
-  return (headEx child)
-
 selectDropdownByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Text -> m ()
 selectDropdownByLabel label optionName = do
-  targetOption <- findChildByLabelF
-    label "option" (\el -> (== optionName) <$> WD.getText el)
-  WD.click targetOption
+  field <- findFieldByLabel label
+  targetOptions <- WD.findElemsFrom field $ WD.ByXPath $
+    "option[text() = \"" <> optionName <> "\"]"
+  liftIO $ targetOptions `shouldSatisfy` ((==1) . length)
+  WD.click $ headEx targetOptions
 
 selectBoolByLabel :: (WD.WebDriver m, MonadIO m) => Text -> Bool -> m ()
 selectBoolByLabel labelText value = do
