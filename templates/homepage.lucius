@@ -47,28 +47,28 @@ body:after {
     position:absolute;
     width:0;
     height:0;
-    content: url("/static/images/minus-active.png")
-             url("/static/images/plus-active.png")
-             url("/static/images/garbage-active.png");
+    content: url("@{StaticR images_minus_active_png}")
+             url("@{StaticR images_plus_active_png}")
+             url("@{StaticR images_garbage_active_png}");
     overflow: hidden;
 }
 .btn-minus {
-    background-image: url("/static/images/minus.png");
+    background-image: url("@{StaticR images_minus_png}");
 }
 .btn-minus:active {
-    background-image: url("/static/images/minus-active.png");
+    background-image: url("@{StaticR images_minus_active_png}");
 }
 .btn-plus {
-    background-image: url("/static/images/plus.png");
+    background-image: url("@{StaticR images_plus_png}");
 }
 .btn-plus:active {
-    background-image: url("/static/images/plus-active.png");
+    background-image: url("@{StaticR images_plus_active_png}");
 }
 .btn-delete {
-    background-image: url("/static/images/garbage.png");
+    background-image: url("@{StaticR images_garbage_png}");
 }
 .btn-delete:active {
-    background-image: url("/static/images/garbage-active.png");
+    background-image: url("@{StaticR images_garbage_active_png}");
 }
 #ratings-table {
     table-layout: fixed;
