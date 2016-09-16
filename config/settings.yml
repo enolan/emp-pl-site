@@ -34,5 +34,7 @@ database:
 
 #analytics: UA-YOURCODE
 
+allowDummyAuth : false
+
 gOAuthCID: "_env:GOAUTHCID:broken"
 gOAuthCS:  "_env:GOAUTHCS:broken"

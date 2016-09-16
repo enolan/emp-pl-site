@@ -3,6 +3,7 @@ module Handler.HomeSpec (spec) where
 
 import           TestImport
 
+import           Data.Aeson (Value)
 import           Data.Maybe (fromJust)
 import qualified Test.WebDriver as WD
 import qualified Test.WebDriver.Class as WD
@@ -68,17 +69,17 @@ spec = do
       get HomeR
   describe "homepage (selenium)" $ do
     it "lets you log in" $ withServerM $ do
-      login
+      loginGoogle
       -- Just check it exists
       _demoForm <- wait $ WD.findElem $ WD.ById "demoForm"
       return ()
     it "lets you enter demographic information" $ withServerM $ do
-      login
+      loginDummy
       enterDemo
       res <- runDB' $ count ([] :: [Filter UserDemographics])
       liftIO $ res `shouldBe` 1
     it "lets you dismiss the explanation" $ withServerM $ do
-      login
+      loginDummy
       enterDemo
       let explainBox = WD.ById "explainBox"
           readOnlyPrograms = WD.ByCSS "input.program-name[readonly]"
@@ -93,8 +94,16 @@ spec = do
       wait $ WDWait.expect =<< WD.isDisplayed explanationBox
       assertDoesNotExist readOnlyPrograms
 
-login :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
-login = do
+loginDummy :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
+loginDummy = do
+      openRoute HomeR
+      _ :: Value <- WD.executeJS [] $
+        "$.ajax({async: false, data: {ident: \"test\"}, method: \"POST\"," <>
+        "url: \"https://localhost:3443/auth/page/dummy\"})"
+      openRoute HomeR
+
+loginGoogle :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
+loginGoogle = do
       openRoute HomeR
       loginLink <- WD.findElem $ WD.ByPartialLinkText "log in via Google"
       loginHref <- WD.attr loginLink "href"

@@ -51,6 +51,7 @@ data AppSettings = AppSettings
 
     , appAnalytics              :: Maybe Text
     -- ^ Google Analytics code
+    , appAllowDummyAuth         :: Bool
 
     , gOAuthCID                 :: Text
     , gOAuthCS                  :: Text
@@ -80,6 +81,7 @@ instance FromJSON AppSettings where
         appSkipCombining          <- o .:? "skip-combining"   .!= defaultDev
 
         appAnalytics              <- o .:? "analytics"
+        appAllowDummyAuth         <- o .:  "allowDummyAuth"
         gOAuthCID                 <- o .:  "gOAuthCID"
         gOAuthCS                  <- o .:  "gOAuthCS"
 

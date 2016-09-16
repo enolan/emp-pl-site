@@ -7,6 +7,7 @@ import qualified Data.Text.Encoding as TE
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
+import Yesod.Auth.Dummy
 import Yesod.Auth.GoogleEmail2    (authGoogleEmail, forwardUrl)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
@@ -151,8 +152,8 @@ instance YesodAuth App where
           user = User email
       res <- runDB $ insertBy user
       pure $ Authenticated $ either entityKey id res
-    -- You can add other plugins like Google Email, email or OAuth here
-    authPlugins app = [authGoogleEmail']
+    authPlugins app =
+      authGoogleEmail' : [authDummy | appAllowDummyAuth $ appSettings app]
       where authGoogleEmail' = authGoogleEmail
               (gOAuthCID $ appSettings app)
               (gOAuthCS $ appSettings app)

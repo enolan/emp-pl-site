@@ -8,5 +8,7 @@ database:
   #   database: "_env:PGDATABASE:emp-pl-site_LOWER_test"
   database: empplsite_lower_test
 
+allowDummyAuth: true
+
 googleUser: "_env:GOOGLEUSER"
 googlePassword: "_env:GOOGLEPASSWORD"
