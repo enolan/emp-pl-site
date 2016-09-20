@@ -111,15 +111,19 @@ function handleProgramNameChange (ev) {
         .append($("<td>")
                 .append($("<button>")
                         .addClass("btn-score btn-delete")));
-    $(ev.target).parent().parent().find("button.btn-score")
-        .click(handleScoreButton);
+    let evTr = $(ev.target).parent().parent();
+    evTr.find("button.btn-score").click(handleScoreButton);
+    evTr.addClass("pending");
     clearExampleData();
     $("#ratings-table").append(el);
     updatePointsTable(el);
     $.ajax({
         method: "POST",
         url: "@{RatingR}",
-        data: {action: "new", prgmName: $(ev.target).val(), prgmScore: 0}
+        data: {action: "new", prgmName: $(ev.target).val(), prgmScore: 0},
+        success: function (data, textStatus, jqxhr) {
+            evTr.removeClass("pending");
+        }
     })
 }
 
@@ -150,22 +154,31 @@ function handleScoreButton(ev) {
         break;
     case "delete":
         if (!tr.hasClass("example-data")) {
+            tr.addClass("pending");
             $.ajax({
                 method: "DELETE",
                 url: "@{RatingR}",
-                data: {prgmName: prgmName}
+                data: {prgmName: prgmName},
+                success: function (data, textStatus, jqxhr) {
+                    tr.remove();
+                }
             });
+        } else {
+            tr.remove();
         }
-        tr.remove();
         return;
     }
     prgmCostEl.text(prgmScore * prgmScore);
     let okay = updatePointsTable(prgmScoreEl);
     if (okay && !tr.hasClass("example-data")) {
+        tr.addClass("pending");
         $.ajax({
             method: "POST",
             url: "@{RatingR}",
-            data: {action: action, prgmName: prgmName, prgmScore: prgmScore}
+            data: {action: action, prgmName: prgmName, prgmScore: prgmScore},
+            success: function (data, textStatus, jqxhr) {
+                tr.removeClass("pending");
+            }
         });
     }
 }
