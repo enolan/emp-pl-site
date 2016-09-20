@@ -125,6 +125,10 @@ ratingProp = do
         tr <- getTr n
         decBtn <- WD.findElemFrom tr $ WD.ByCSS ".btn-minus"
         WD.click decBtn
+    let waitForServer = do
+          pendingTrs <- WD.findElems $ WD.ByCSS "tr.pending"
+          WDWait.expect $ null pendingTrs
+    run $ wait waitForServer
     validate
     go as
   getTr n = wait $ WD.findElem $ WD.ByXPath $
@@ -179,6 +183,9 @@ mkActs = sized (\s -> choose (0,s) >>= go 0)
     [(1, do n' <- choose (0, n - 1)
             rest <- go' (n - 1) (size - 1)
             return $ Delete n' : rest),
+     (1, do addpr <- AddProgram <$> arbitrary
+            rest <- go' (n + 1) (size - 1)
+            return $ addpr:rest),
      (2, do n' <- choose (0, n - 1)
             rest <- go' n (size - 1)
             action <- elements $ map ($ n') [IncreaseRating, DecreaseRating]
