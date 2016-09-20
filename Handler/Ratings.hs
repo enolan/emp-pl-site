@@ -54,14 +54,18 @@ deleteRatingR = do
 getPoints :: Handler (Int,Int)
 getPoints = do
   uid <- requireAuthId
-  res <- runDB $
-    select $
-      from $ \rating -> do
-        where_ $ val uid E.==. (rating ^. RatingUser)
-        let score = rating ^. RatingScore
-            ratingCount = E.count score :: SqlExpr (E.Value Int)
-        return (sum_ $ score *. score, ratingCount *. val 25)
- -- Postgres' SUM on bigints returns numeric which is interpreted as Rational
+  runDB $ getPointsDB uid
+
+getPointsDB ::
+  MonadIO m => Key User -> ReaderT SqlBackend m (Int, Int)
+getPointsDB uid = do
+  res <- select $
+    from $ \rating -> do
+      where_ $ val uid E.==. (rating ^. RatingUser)
+      let score = rating ^. RatingScore
+          ratingCount = E.count score :: SqlExpr (E.Value Int)
+      return (sum_ $ score *. score, ratingCount *. val 25)
+  -- Postgres' SUM on bigints returns numeric which is interpreted as Rational
   let ratToInt :: Rational -> Int
       ratToInt x = floor (fromRational x :: Float)
   case res of

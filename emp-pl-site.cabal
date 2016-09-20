@@ -135,14 +135,17 @@ test-suite test
                  , classy-prelude
                  , classy-prelude-yesod
                  , emp-pl-site
+                 , esqueleto
                  , file-embed
                  , hspec
                  , hspec-webdriver
                  , monad-logger
                  , persistent
                  , persistent-postgresql
+                 , QuickCheck
                  , resourcet
                  , shakespeare
+                 , text-icu
                  , transformers
                  , warp
                  , warp-tls

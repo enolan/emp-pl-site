@@ -6,6 +6,10 @@ resolver: lts-6.9
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
+- location:
+    git: git@github.com:enolan/async.git
+    commit: 9da751d2946da688151cb9861d4fca6baa95c5a6
+  extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: []

@@ -5,10 +5,15 @@ import           TestImport
 
 import           Data.Aeson (Value)
 import           Data.Maybe (fromJust)
+import           Data.Text.ICU.Normalize
+import           Database.Esqueleto hiding (Value, (==.), count, get)
+import qualified Database.Esqueleto as E
 import qualified Test.WebDriver as WD
 import qualified Test.WebDriver.Class as WD
 import qualified Test.WebDriver.Commands.Wait as WDWait
 import           Yesod.Core.Handler (RedirectUrl, toTextUrl)
+
+import Handler.Ratings (getPointsDB)
 
 mkUrl :: (MonadReader (TestApp App) m, MonadIO m, RedirectUrl App r) =>
   r -> m Text
@@ -93,6 +98,98 @@ spec = do
       WD.findElem explanationButton >>= WD.click
       wait $ WDWait.expect =<< WD.isDisplayed explanationBox
       assertDoesNotExist readOnlyPrograms
+    it "maintains invariants when entering ratings" $ wdProperty $ do
+      run $ loginDummy >> enterDemo
+      ratingProp
+
+ratingProp :: PropertyM (ReaderT (TestApp App) WD.WD) ()
+ratingProp = do
+  run $ WD.findElem (WD.ByCSS "button#explanationButton") >>= WD.click
+  pick mkActs >>= go
+  where
+  go []       = validate
+  go (a : as) = do
+    run $ case a of
+      Delete n -> do
+        tr <- getTr n
+        delBtn <- WD.findElemFrom tr $ WD.ByCSS ".btn-delete"
+        WD.click delBtn
+      AddProgram str -> do
+        blankField <- WD.findElem $ WD.ByCSS "input.program-name:not([readonly])"
+        WD.sendKeys (normalize NFC (pack str) <> "\n") blankField
+      IncreaseRating n -> do
+        tr <- getTr n
+        incBtn <- WD.findElemFrom tr $ WD.ByCSS ".btn-plus"
+        WD.click incBtn
+      DecreaseRating n -> do
+        tr <- getTr n
+        decBtn <- WD.findElemFrom tr $ WD.ByCSS ".btn-minus"
+        WD.click decBtn
+    validate
+    go as
+  getTr n = wait $ WD.findElem $ WD.ByXPath $
+    "//table[@id='ratings-table']/tbody/tr[" <> tshow (n + 1) <> "]"
+  validate = do
+    trs <- run $ WD.findElems $ WD.ByXPath
+      "//table[@id='ratings-table']/tbody/tr[td/input/@readonly]"
+    domTuple@(_pointsSpent, _totalBudget) :: (Int, Int) <- foldM
+      (\(pointsSpentSoFar, totalBudgetSoFar) tr -> do
+          mbScore <- readMay <$> run
+            (WD.findElemFrom tr (WD.ByCSS "span.score") >>= WD.getText)
+          mbCost  <- readMay <$> run
+            (WD.findElemFrom tr (WD.ByCSS "span.cost") >>= WD.getText)
+          mbName <- run $ do
+            input <- WD.findElemFrom tr (WD.ByCSS "input.program-name")
+            WD.attr input "value"
+          case (mbScore, mbCost, mbName) of
+            (Just score, Just cost, Just name) -> if cost == score ^ (2 :: Int)
+              then do
+                dbScore <- run $ runDB' $ select $ from $
+                  \(rating `InnerJoin` program) -> do
+                    E.on (rating ^. RatingProgram E.==. program ^. ProgramId)
+                    where_ (program ^. ProgramName E.==. val name)
+                    return $ rating ^. RatingScore
+                case dbScore of
+                  [E.Value dbScore'] -> if dbScore' == score
+                    then return
+                      (pointsSpentSoFar + score ^ (2 :: Int),
+                       totalBudgetSoFar + 25)
+                    else fail "db score not equal to dom score"
+                  _                  -> fail "dbScore not exactly one element"
+              else fail "cost not equal to score^2"
+            _                       -> fail "score or cost didn't parse")
+      (0, 0)
+      trs
+    uid <- fmap entityKey <$> run (runDB' $ getBy (UniqueEmail "test"))
+    case uid of
+      Just uid' -> do
+        dbTuple@(_pointsSpentDB, _totalBudgetDB) <-
+          run $ runDB' $ getPointsDB uid'
+        unless (dbTuple == domTuple) $ fail "dbTuple != domTuple"
+      Nothing   -> fail "couldn't find test user in db"
+
+mkActs :: Gen [RatingAction]
+mkActs = sized (\s -> choose (0,s) >>= go 0)
+  where
+  go _ 0    = return []
+  go 0 size = do addpr <- AddProgram <$> arbitrary
+                 rest <- go' 1 (size - 1)
+                 return $ addpr:rest
+  go n size = frequency
+    [(1, do n' <- choose (0, n - 1)
+            rest <- go' (n - 1) (size - 1)
+            return $ Delete n' : rest),
+     (2, do n' <- choose (0, n - 1)
+            rest <- go' n (size - 1)
+            action <- elements $ map ($ n') [IncreaseRating, DecreaseRating]
+            return $ action : rest)
+    ]
+  go' n size = resize size $ go n size
+
+data RatingAction = Delete Int
+                  | AddProgram String
+                  | IncreaseRating Int
+                  | DecreaseRating Int deriving (Show)
 
 loginDummy :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
 loginDummy = do

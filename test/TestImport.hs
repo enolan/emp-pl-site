@@ -8,7 +8,7 @@ import Application           (makeApplication, makeFoundation, makeLogWare,
 import Model                 as X
 import Settings              as X (AppSettings(..))
 
-import ClassyPrelude         as X hiding (delete, deleteBy)
+import ClassyPrelude         as X hiding (assert, delete, deleteBy)
 import Control.Concurrent.Async
 import Data.FileEmbed
 import Database.Persist      as X hiding (get)
@@ -18,6 +18,8 @@ import Foundation            as X
 import Network.Wai.Handler.Warp (setBeforeMainLoop, setPort)
 import Network.Wai.Handler.WarpTLS (TLSSettings(..), tlsSettingsMemory, runTLS)
 import Test.Hspec            as X
+import Test.QuickCheck       as X hiding (label)
+import Test.QuickCheck.Monadic as X
 import Test.WebDriver as WD
 import Text.Shakespeare.Text (st)
 import Yesod.Auth            as X (Route(..))
@@ -42,7 +44,7 @@ myTlsSettings :: TLSSettings
 myTlsSettings = tlsSettingsMemory
   $(embedFile "test/cert.crt") $(embedFile "test/key.pem")
 
-withServerM :: ReaderT (TestApp App) WD () -> Expectation
+withServerM :: ReaderT (TestApp App) WD a -> IO a
 withServerM test = do
   -- Start warp-tls, wait for it to be ready, run the test and let async kill
   -- the server for us. If an exception is thrown by the server thread, make
@@ -56,6 +58,11 @@ withServerM test = do
     link a
     takeMVar waitVar
     runSession defaultConfig $ finallyClose $ runReaderT test appTuple
+
+wdProperty :: PropertyM (ReaderT (TestApp App) WD) a -> Property
+wdProperty = monadic wdPropToProp
+  where wdPropToProp :: ReaderT (TestApp App) WD Property -> Property
+        wdPropToProp prop = ioProperty $ withServerM prop
 
 setupApp :: IO (TestApp App)
 setupApp = do
