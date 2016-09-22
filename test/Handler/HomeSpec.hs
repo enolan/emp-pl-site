@@ -136,7 +136,7 @@ ratingProp = do
   validate = do
     trs <- run $ WD.findElems $ WD.ByXPath
       "//table[@id='ratings-table']/tbody/tr[td/input/@readonly]"
-    domTuple@(_pointsSpent, _totalBudget) :: (Int, Int) <- foldM
+    tableTuple@(_tblPointsSpent, _tblTotalBudget) :: (Int, Int) <- foldM
       (\(pointsSpentSoFar, totalBudgetSoFar) tr -> do
           mbScore <- readMay <$> run
             (WD.findElemFrom tr (WD.ByCSS "span.score") >>= WD.getText)
@@ -164,12 +164,26 @@ ratingProp = do
             _                       -> fail "score or cost didn't parse")
       (0, 0)
       trs
+    (totalBudgetSummary, pointsRemainingSummary) <- do
+      mbTotalBudget <- readMay <$> run
+        (WD.findElem (WD.ByCSS "#total-budget") >>= WD.getText)
+      mbPointsRemaining <- readMay <$> run
+        (WD.findElem (WD.ByCSS "#available-points") >>= WD.getText)
+      case (mbTotalBudget, mbPointsRemaining) of
+        (Just totalBudget, Just pointsRemaining) ->
+          return (totalBudget, pointsRemaining)
+        _ -> fail "couldn't parse summary table"
+    unless
+      ((totalBudgetSummary - pointsRemainingSummary, totalBudgetSummary)
+       ==
+       tableTuple) $
+      fail "summary table values not equal to summary computed from table"
     uid <- fmap entityKey <$> run (runDB' $ getBy (UniqueEmail "test"))
     case uid of
       Just uid' -> do
         dbTuple@(_pointsSpentDB, _totalBudgetDB) <-
           run $ runDB' $ getPointsDB uid'
-        unless (dbTuple == domTuple) $ fail "dbTuple != domTuple"
+        unless (dbTuple == tableTuple) $ fail "dbTuple != domTuple"
       Nothing   -> fail "couldn't find test user in db"
 
 mkActs :: Gen [RatingAction]
