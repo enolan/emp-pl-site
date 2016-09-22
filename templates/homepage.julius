@@ -161,10 +161,12 @@ function handleScoreButton(ev) {
                 data: {prgmName: prgmName},
                 success: function (data, textStatus, jqxhr) {
                     tr.remove();
+                    updatePointsTable();
                 }
             });
         } else {
             tr.remove();
+            updatePointsTable();
         }
         return;
     }
