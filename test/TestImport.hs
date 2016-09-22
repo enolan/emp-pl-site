@@ -10,6 +10,7 @@ import Settings              as X (AppSettings(..))
 
 import ClassyPrelude         as X hiding (assert, delete, deleteBy)
 import Control.Concurrent.Async
+import qualified Control.Monad.Catch as CMC
 import Data.FileEmbed
 import Database.Persist      as X hiding (get)
 import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool,
@@ -19,7 +20,8 @@ import Network.Wai.Handler.Warp (setBeforeMainLoop, setPort)
 import Network.Wai.Handler.WarpTLS (TLSSettings(..), tlsSettingsMemory, runTLS)
 import Test.Hspec            as X
 import Test.QuickCheck       as X hiding (label)
-import Test.QuickCheck.Monadic as X
+import Test.QuickCheck.Monadic as X hiding (run)
+import qualified Test.QuickCheck.Monadic
 import Test.WebDriver as WD
 import Text.Shakespeare.Text (st)
 import Yesod.Auth            as X (Route(..))
@@ -63,6 +65,12 @@ wdProperty :: PropertyM (ReaderT (TestApp App) WD) a -> Property
 wdProperty = monadic wdPropToProp
   where wdPropToProp :: ReaderT (TestApp App) WD Property -> Property
         wdPropToProp prop = ioProperty $ withServerM prop
+
+run :: MonadCatch m => m a -> PropertyM m a
+run act = do res <- Test.QuickCheck.Monadic.run $ CMC.try act
+             case res of
+               Left (ex :: SomeException) -> fail $ "exception: " <> show ex
+               Right res' -> return res'
 
 setupApp :: IO (TestApp App)
 setupApp = do
