@@ -248,3 +248,5 @@ enterDemo = do
     selectDropdownByLabel "Country of residence" "United States"
     selectBoolByLabel "Are you a computer programmer?" True
     WD.findElem (WD.ByTag "form") >>= WD.submit
+    void $ wait $
+      WD.findElem (WD.ByCSS "#ratingsBox") >>= WD.isDisplayed >>= WDWait.expect
