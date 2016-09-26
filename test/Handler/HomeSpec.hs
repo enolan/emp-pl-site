@@ -4,6 +4,7 @@ module Handler.HomeSpec (spec) where
 import           TestImport
 
 import           Data.Aeson (Value)
+import           Data.Char (isPrint)
 import           Data.Maybe (fromJust)
 import           Data.Text.ICU.Normalize
 import           Database.Esqueleto hiding (Value, (==.), count, get)
@@ -158,7 +159,9 @@ ratingProp = do
                     then return
                       (pointsSpentSoFar + score ^ (2 :: Int),
                        totalBudgetSoFar + 25)
-                    else fail "db score not equal to dom score"
+                    else fail $
+                         "db score not equal to dom score\ndbScore = " <>
+                         show dbScore <> "\nscore = " <> show score
                   _                  -> fail "dbScore not exactly one element"
               else fail "cost not equal to score^2"
             _                       -> fail "score or cost didn't parse")
@@ -190,22 +193,24 @@ mkActs :: Gen [RatingAction]
 mkActs = sized (\s -> choose (0,s) >>= go 0)
   where
   go _ 0    = return []
-  go 0 size = do addpr <- AddProgram <$> arbitrary
+  go 0 size = do addpr' <- addpr
                  rest <- go' 1 (size - 1)
-                 return $ addpr:rest
+                 return $ addpr':rest
   go n size = frequency
     [(1, do n' <- choose (0, n - 1)
             rest <- go' (n - 1) (size - 1)
             return $ Delete n' : rest),
-     (1, do addpr <- AddProgram <$> arbitrary
+     (1, do addpr' <- addpr
             rest <- go' (n + 1) (size - 1)
-            return $ addpr:rest),
+            return $ addpr':rest),
      (2, do n' <- choose (0, n - 1)
             rest <- go' n (size - 1)
             action <- elements $ map ($ n') [IncreaseRating, DecreaseRating]
             return $ action : rest)
     ]
   go' n size = resize size $ go n size
+  addpr = AddProgram <$>
+    (arbitrary `suchThat` (\s -> not (null s) && all isPrint s))
 
 data RatingAction = Delete Int
                   | AddProgram String
