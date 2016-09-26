@@ -5,8 +5,10 @@ import           TestImport
 
 import           Data.Aeson (Value)
 import           Data.Char (isPrint)
+import           Data.CountryCodes (CountryCode(US))
 import           Data.Maybe (fromJust)
 import           Data.Text.ICU.Normalize
+import           Data.Time.Format
 import           Database.Esqueleto hiding (Value, (==.), count, get)
 import qualified Database.Esqueleto as E
 import qualified Test.WebDriver as WD
@@ -81,12 +83,14 @@ spec = do
       return ()
     it "lets you enter demographic information" $ withServerM $ do
       loginDummy
+      openRoute HomeR
       enterDemo
       res <- runDB' $ count ([] :: [Filter UserDemographics])
       liftIO $ res `shouldBe` 1
     it "lets you dismiss the explanation" $ withServerM $ do
       loginDummy
-      enterDemo
+      enterDemoDummy
+      openRoute HomeR
       let explainBox = WD.ById "explainBox"
           readOnlyPrograms = WD.ByCSS "input.program-name[readonly]"
           blankProgram = WD.ByCSS "input.program-name:not([readonly])"
@@ -100,7 +104,7 @@ spec = do
       wait $ WDWait.expect =<< WD.isDisplayed explanationBox
       assertDoesNotExist readOnlyPrograms
     it "maintains invariants when entering ratings" $ wdProperty $ do
-      run $ loginDummy >> enterDemo
+      run $ loginDummy >> enterDemoDummy >> openRoute HomeR
       ratingProp
 
 ratingProp :: PropertyM (ReaderT (TestApp App) WD.WD) ()
@@ -223,7 +227,7 @@ loginDummy = do
       _ :: Value <- WD.executeJS [] $
         "$.ajax({async: false, data: {ident: \"test\"}, method: \"POST\"," <>
         "url: \"https://localhost:3443/auth/page/dummy\"})"
-      openRoute HomeR
+      return ()
 
 loginGoogle :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
 loginGoogle = do
@@ -255,3 +259,17 @@ enterDemo = do
     WD.findElem (WD.ByTag "form") >>= WD.submit
     void $ wait $
       WD.findElem (WD.ByCSS "#ratingsBox") >>= WD.isDisplayed >>= WDWait.expect
+
+enterDemoDummy :: ReaderT (TestApp App) WD.WD ()
+enterDemoDummy = do
+  uid <- runDB' $ getBy $ UniqueEmail "test"
+  time <- parseTimeM False defaultTimeLocale (iso8601DateFormat Nothing) "1984-02-22"
+  _ <- case uid of
+    Just uid' -> runDB' $ insertBy UserDemographics
+      {userDemographicsUser = entityKey uid'
+      ,userDemographicsBirthYear = time
+      ,userDemographicsGender = "woman"
+      ,userDemographicsResidence = US
+      ,userDemographicsProgrammer = True}
+    Nothing -> fail "Not logged in???"
+  return ()

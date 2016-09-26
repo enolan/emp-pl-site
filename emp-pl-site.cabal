@@ -135,6 +135,7 @@ test-suite test
                  , base
                  , classy-prelude
                  , classy-prelude-yesod
+                 , country-codes
                  , emp-pl-site
                  , esqueleto
                  , exceptions
@@ -148,6 +149,7 @@ test-suite test
                  , resourcet
                  , shakespeare
                  , text-icu
+                 , time
                  , transformers
                  , warp
                  , warp-tls
