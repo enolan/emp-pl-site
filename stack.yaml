@@ -37,3 +37,14 @@ extra-package-dbs: []
 
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
+
+docker:
+  enable: true
+
+image:
+  containers:
+    - base: 'fpco/stack-run'
+      add:
+        static: '/static'
+        config: '/config'
+      entrypoints: [emp-pl-site]

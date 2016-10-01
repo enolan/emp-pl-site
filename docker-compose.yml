@@ -1,0 +1,13 @@
+version: '2'
+services:
+  emp-pl-site:
+    image: emp-pl-site-emp-pl-site
+    ports:
+     - "3443:3443"
+    links:
+     - postgres
+    env_file:
+       emp-pl-site_dev_env
+  postgres:
+    image: postgres:9.5
+    env_file: postgres_dev_env

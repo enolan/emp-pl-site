@@ -19,3 +19,4 @@ cabal.sandbox.config
 TAGS
 yesod-devel.sh
 test.sh
+*env
