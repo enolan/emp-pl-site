@@ -21,6 +21,6 @@ services:
       - ./dev-certs:/certs
       - ./config/nginx.conf:/etc/nginx/nginx.conf
   selenium:
-    image: selenium/standalone-firefox:local
+    image: selenium/standalone-firefox # :local
     ports:
       - "5900:5900"
