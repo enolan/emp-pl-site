@@ -17,5 +17,5 @@ install:
 - export PGPASS=$(head -c 20 /dev/urandom | sha1sum|head -c 40)
 - echo POSTGRES_PASSWORD=$PGPASS >> postgres_dev_env
 - echo PGPASS=$PGPASS >> emp-pl-site_dev_env
-- docker-compose up -d
+- docker-compose up postgres selenium
 - stack --no-terminal --install-ghc test
