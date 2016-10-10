@@ -2,10 +2,20 @@ sudo: required
 services: docker
 language: c
 before_install:
-  - unset CC
-  - mkdir -p ~/.local/bin
-  - export PATH=$HOME/.local/bin:$PATH
-  - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+  # env vars GOOGLEUSER GOOGLEPASSWORD GOAUTHCID GOAUTHCS
+- openssl aes-256-cbc -K $encrypted_089d332adc0c_key -iv $encrypted_089d332adc0c_iv
+  -in secret-emp-pl-site.enc -out secret-emp-pl-site -d
+- unset CC
+- mkdir -p ~/.local/bin
+- export PATH=$HOME/.local/bin:$PATH
+- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards
+  --strip-components=1 -C ~/.local/bin '*/stack'
 install:
-  - docker-compose up -d
-  - stack --no-terminal --install-ghc test
+- cp emp-pl-site_dev_env.sample emp-pl-site_dev_env
+- cat secret-emp-pl-site >> emp-pl-site_dev_env
+- cp postgres_dev_env.sample postgres_dev_env
+- export PGPASS=$(head -c 20 /dev/urandom)
+- echo POSTGRES_PASSWORD=$PGPASS >> postgres_dev_env
+- echo PGPASS=$PGPASS >> emp-pl-site_dev_env
+- docker-compose up -d
+- stack --no-terminal --install-ghc test

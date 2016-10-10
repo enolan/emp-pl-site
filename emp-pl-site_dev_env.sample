@@ -1,6 +1,10 @@
 PGHOST=postgres
-PGDATABASE=postgres
-PGUSER=postgres
-PGPASS=CHANGEME
-GOAUTHCID=CHANGEME
-GOAUTHCS=CHANGEME
+PGDATABASE=empplsite
+PGUSER=empplsite
+APPROOT=https://localhost:3443
+# add your own stuff here
+# GOOGLEUSER=
+# GOOGLEPASSWORD=
+# PGPASS=
+# GOAUTHCID=
+# GOAUTHCS=
