@@ -14,7 +14,7 @@ install:
 - cp emp-pl-site_dev_env.sample emp-pl-site_dev_env
 - cat secret-emp-pl-site >> emp-pl-site_dev_env
 - cp postgres_dev_env.sample postgres_dev_env
-- export PGPASS=$(head -c 20 /dev/urandom)
+- export PGPASS=$(head -c 20 /dev/urandom | sha1sum|head -c 40)
 - echo POSTGRES_PASSWORD=$PGPASS >> postgres_dev_env
 - echo PGPASS=$PGPASS >> emp-pl-site_dev_env
 - docker-compose up -d
