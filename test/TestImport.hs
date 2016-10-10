@@ -44,7 +44,7 @@ withApp = before setupApp
 
 myTlsSettings :: TLSSettings
 myTlsSettings = tlsSettingsMemory
-  $(embedFile "test/cert.crt") $(embedFile "test/key.pem")
+  $(embedFile "dev-certs/cert.pem") $(embedFile "dev-certs/key.pem")
 
 withServerM :: ReaderT (TestApp App) WD a -> IO a
 withServerM test = do
@@ -59,7 +59,7 @@ withServerM test = do
   withAsync (runTLS myTlsSettings warpSettings' app) $ \a -> do
     link a
     takeMVar waitVar
-    runSession defaultConfig $ finallyClose $ runReaderT test appTuple
+    runSession (defaultConfig { wdHost = "selenium" }) $ finallyClose $ runReaderT test appTuple
 
 wdProperty :: PropertyM (ReaderT (TestApp App) WD) a -> Property
 wdProperty = monadic wdPropToProp
@@ -78,7 +78,8 @@ setupApp = do
         ["config/test-settings.yml", "config/settings.yml"]
         []
         useEnv
-    foundation <- makeFoundation settings
+    let settings' = settings { appRoot = Just $ "https://stack-exec.org:3443"}
+    foundation <- makeFoundation settings'
     wipeDB foundation
     logWare <- liftIO $ makeLogWare foundation
     return (foundation, logWare)

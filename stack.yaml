@@ -40,6 +40,14 @@ extra-package-dbs: []
 
 docker:
   enable: true
+  run-args:
+    - "--env-file"
+    - "emp-pl-site_dev_env"
+    - "--net=bridge"
+    - "--network"
+    - "empplsite_default"
+    - "--name"
+    - "stack-exec.org"
 
 image:
   containers:

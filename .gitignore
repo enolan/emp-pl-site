@@ -20,3 +20,4 @@ TAGS
 yesod-devel.sh
 test.sh
 *env
+*.pem

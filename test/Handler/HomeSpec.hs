@@ -226,7 +226,7 @@ loginDummy = do
       openRoute HomeR
       _ :: Value <- WD.executeJS [] $
         "$.ajax({async: false, data: {ident: \"test\"}, method: \"POST\"," <>
-        "url: \"https://localhost:3443/auth/page/dummy\"})"
+        "url: \"https://stack-exec.org:3443/auth/page/dummy\"})"
       return ()
 
 loginGoogle :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
@@ -246,9 +246,11 @@ loginGoogle = do
       WD.sendKeys (fromJust $ googlePassword settings) passwdField
       signInButton <- WD.findElem $ WD.ById "signIn"
       WD.click signInButton
-      approveButton <- WD.findElem $ WD.ById "submit_approve_access"
-      wait $ WDWait.expect =<< isClickable approveButton
-      WD.click approveButton
+      url <- WD.getCurrentURL
+      when ("google" `isInfixOf` url) $ do
+        approveButton <- WD.findElem $ WD.ById "submit_approve_access"
+        wait $ WDWait.expect =<< isClickable approveButton
+        WD.click approveButton
 
 enterDemo :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
 enterDemo = do

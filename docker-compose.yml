@@ -2,8 +2,7 @@ version: '2'
 services:
   emp-pl-site:
     image: emp-pl-site-emp-pl-site
-    ports:
-     - "3443:3443"
+    expose: [3000]
     links:
      - postgres
     env_file:
@@ -11,3 +10,17 @@ services:
   postgres:
     image: postgres:9.5
     env_file: postgres_dev_env
+    volumes:
+      - ./config/inittestdb.sql:/docker-entrypoint-initdb.d/inittestdb.sql
+  nginx:
+    image: nginx
+    ports:
+      - "3443:443"
+    links: [emp-pl-site]
+    volumes:
+      - ./dev-certs:/certs
+      - ./config/nginx.conf:/etc/nginx/nginx.conf
+  selenium:
+    image: selenium/standalone-firefox:local
+    ports:
+      - "5900:5900"
