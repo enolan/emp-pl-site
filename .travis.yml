@@ -20,4 +20,5 @@ install:
 - docker-compose up -d postgres selenium
 # This is a race. Bringing up postgres and selenium //should// always be slower
 # than downloading GHC and building the whole system though.
+- stack docker pull
 - stack --no-terminal --install-ghc test
