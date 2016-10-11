@@ -7,7 +7,7 @@ resolver: lts-6.9
 packages:
 - '.'
 - location:
-    git: git@github.com:enolan/async.git
+    git: https://github.com/enolan/async.git
     commit: 9da751d2946da688151cb9861d4fca6baa95c5a6
   extra-dep: true
 
