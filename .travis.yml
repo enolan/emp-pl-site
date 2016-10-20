@@ -21,4 +21,6 @@ install:
 # This is a race. Bringing up postgres and selenium //should// always be slower
 # than downloading GHC and building the whole system though.
 - stack docker pull
+script:
+- bash dev-certs/genkey.sh
 - stack --no-terminal --install-ghc test
