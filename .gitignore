@@ -21,3 +21,4 @@ yesod-devel.sh
 test.sh
 *env
 *.pem
+secret-emp-pl-site
