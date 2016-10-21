@@ -12,6 +12,7 @@ services:
     env_file: postgres_dev_env
     volumes:
       - ./config/inittestdb.sql:/docker-entrypoint-initdb.d/inittestdb.sql
+    ports: ["5433:5432"]
   nginx:
     image: nginx
     ports:
