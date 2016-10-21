@@ -59,7 +59,7 @@ withServerM test = do
   withAsync (runTLS myTlsSettings warpSettings' app) $ \a -> do
     link a
     takeMVar waitVar
-    runSession (defaultConfig { wdHost = "selenium" }) $ finallyClose $ runReaderT test appTuple
+    runSession (defaultConfig { wdHost = "selenium", wdCapabilities = defaultCaps {browser = chrome} }) $ finallyClose $ runReaderT test appTuple
 
 wdProperty :: PropertyM (ReaderT (TestApp App) WD) a -> Property
 wdProperty = monadic wdPropToProp
