@@ -132,7 +132,8 @@ ratingProp = do
         WD.click decBtn
     let waitForServer = do
           pendingTrs <- WD.findElems $ WD.ByCSS "tr.pending"
-          WDWait.expect $ null pendingTrs
+          overBudgetEls <- WD.findElems $ WD.ByCSS ".overbudget"
+          WDWait.expect $ null $ pendingTrs <> overBudgetEls
     run $ wait waitForServer
     validate
     go as

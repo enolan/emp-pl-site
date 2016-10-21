@@ -48,8 +48,8 @@ function updatePointsTable(prgmScoreEl) {
         averagePointsEl.text("N/A");
     }
     if (availablePoints < 0) {
-        availablePointsEl.css("background", "red");
-        prgmScoreEl.css("background", "red");
+        availablePointsEl.addClass("overbudget");
+        prgmScoreEl.addClass("overbudget");
         $(".btn-score:not(.btn-delete)").prop("disabled", true);
         window.setTimeout(function () {
             let prgmScore = Number.parseInt(prgmScoreEl.text());
@@ -63,9 +63,9 @@ function updatePointsTable(prgmScoreEl) {
             updatePointsTable(prgmScoreEl);
         }, 500)
         return false;
-    } else if (prgmScoreEl !== undefined){
-        availablePointsEl.css("background", "none");
-        prgmScoreEl.css("background", "none");
+    } else if (prgmScoreEl !== undefined) {
+        availablePointsEl.removeClass("overbudget");
+        prgmScoreEl.removeClass("overbudget");
         $(".btn-score:not(.btn-delete)").prop("disabled", false);
         return true;
     }

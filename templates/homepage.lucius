@@ -112,3 +112,6 @@ tr.pending {
         background-color: orange;
     }
 }
+.overbudget {
+    background: red;
+}
