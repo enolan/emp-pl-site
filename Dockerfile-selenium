@@ -1,13 +1,14 @@
 #FROM selenium/standalone-chrome-debug
 FROM selenium/standalone-chrome
 
+# for some reason some things need sudo on Travis but not on my machine...
 RUN sudo mv /opt/bin/entry_point.sh /opt/bin/selenium-entry-point.sh
 
 ADD target-hostname-hack/entrypoint.sh /opt/bin/entrypoint.sh
-RUN chmod +x /opt/bin/entrypoint.sh
+RUN sudo chmod +x /opt/bin/entrypoint.sh
 
 # target-hostname-hack is linked against pq because of dependency on site lib.
-RUN apt-get update && sudo apt-get install libpq5
+RUN sudo apt-get update && sudo apt-get install libpq5
 ADD .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-6.9/7.10.3/bin/target-hostname-hack /opt/bin/target-hostname-hack
 
 CMD /opt/bin/entrypoint.sh
