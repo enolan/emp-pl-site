@@ -1,7 +1,7 @@
 #FROM selenium/standalone-chrome-debug
 FROM selenium/standalone-chrome
 
-RUN mv /opt/bin/entry_point.sh /opt/bin/selenium-entry-point.sh
+RUN sudo mv /opt/bin/entry_point.sh /opt/bin/selenium-entry-point.sh
 
 ADD target-hostname-hack/entrypoint.sh /opt/bin/entrypoint.sh
 RUN chmod +x /opt/bin/entrypoint.sh
