@@ -18,8 +18,9 @@ install:
 - echo POSTGRES_PASSWORD=$PGPASS >> postgres_dev_env
 - echo PGPASS=$PGPASS >> emp-pl-site_dev_env
 - stack docker pull
+- docker-compose up -d postgres
 - stack build
-- docker-compose up -d postgres selenium
+- docker-compose up -d selenium
 script:
 - bash dev-certs/genkey.sh
 - stack --no-terminal --install-ghc test
