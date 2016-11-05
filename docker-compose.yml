@@ -12,7 +12,7 @@ services:
     env_file: postgres_dev_env
     volumes:
       - ./config/inittestdb.sql:/docker-entrypoint-initdb.d/inittestdb.sql
-    ports: ["5433:5432"]
+    ports: ["5433:5432"] # For PGAdmin from the host
   nginx:
     image: nginx
     ports:
@@ -22,6 +22,9 @@ services:
       - ./dev-certs:/certs
       - ./config/nginx.conf:/etc/nginx/nginx.conf
   selenium:
-    image: selenium/standalone-chrome
+    build:
+      dockerfile: Dockerfile-selenium
+      context: .
+    expose: [31337]
     ports:
       - "5900:5900"

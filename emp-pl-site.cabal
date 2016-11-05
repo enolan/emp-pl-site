@@ -20,6 +20,7 @@ library
                      Handler.Common
                      Handler.Home
                      Handler.Ratings
+                     HostnameApi
                      Import
                      Import.NoFoundation
                      Model
@@ -76,6 +77,7 @@ library
                  , persistent-template
                  , random
                  , safe
+                 , servant
                  , shakespeare
                  , template-haskell
                  , text
@@ -143,11 +145,15 @@ test-suite test
                  , file-embed
                  , hspec
                  , hspec-webdriver
+                 , http-client
                  , monad-logger
+                 , mtl
                  , persistent
                  , persistent-postgresql
+                 , process
                  , QuickCheck
                  , resourcet
+                 , servant-client
                  , shakespeare
                  , text-icu
                  , time
@@ -159,3 +165,11 @@ test-suite test
                  , yesod-auth
                  , yesod-core
                  , yesod-test
+
+executable target-hostname-hack
+    hs-source-dirs:      target-hostname-hack
+    build-depends:       base, classy-prelude, emp-pl-site, network,
+                         servant-server, warp
+    main-is:             Main.hs
+    ghc-options:         -fdefer-typed-holes
+    default-extensions:  NoImplicitPrelude, OverloadedStrings

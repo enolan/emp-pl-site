@@ -46,10 +46,6 @@ docker:
     - "--net=bridge"
     - "--network"
     - "empplsite_default"
-    - "--name"
-    - "stack-exec.org"
-    - "-p"
-    - "3443:3443"
 
 image:
   containers:

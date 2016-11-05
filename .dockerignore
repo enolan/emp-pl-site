@@ -1,1 +1,2 @@
 .stack-work/*
+!.stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-6.9/7.10.3/bin/target-hostname-hack

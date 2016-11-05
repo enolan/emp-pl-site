@@ -5,19 +5,25 @@ module TestImport
 
 import Application           (makeApplication, makeFoundation, makeLogWare,
                               warpSettings)
+import HostnameApi
 import Model                 as X
 import Settings              as X (AppSettings(..))
 
 import ClassyPrelude         as X hiding (assert, delete, deleteBy)
 import Control.Concurrent.Async
 import qualified Control.Monad.Catch as CMC
+import Control.Monad.Except
 import Data.FileEmbed
+import Data.Proxy
 import Database.Persist      as X hiding (get)
 import Database.Persist.Sql  (SqlPersistM, SqlBackend, runSqlPersistMPool,
                               rawExecute, rawSql, unSingle, connEscapeName)
 import Foundation            as X
+import Network.HTTP.Client (defaultManagerSettings, newManager)
 import Network.Wai.Handler.Warp (setBeforeMainLoop, setPort)
 import Network.Wai.Handler.WarpTLS (TLSSettings(..), tlsSettingsMemory, runTLS)
+import Servant.Client
+import System.Process (readProcess)
 import Test.Hspec            as X
 import Test.QuickCheck       as X hiding (label)
 import Test.QuickCheck.Monadic as X hiding (run)
@@ -48,6 +54,14 @@ myTlsSettings = tlsSettingsMemory
 
 withServerM :: ReaderT (TestApp App) WD a -> IO a
 withServerM test = do
+  -- Set IP target
+  ip <- takeWhile (/='\n') <$> readProcess "hostname" ["-i"] ""
+  man <- newManager defaultManagerSettings
+  res <- runExceptT $ client (Proxy :: Proxy HostnameApi) (pack ip) man $ BaseUrl Http "selenium" 31337 ""
+  case res of
+    Left ex -> fail $ show ex
+    Right True -> return ()
+    Right False -> fail "setting hostname returned False"
   -- Start warp-tls, wait for it to be ready, run the test and let async kill
   -- the server for us. If an exception is thrown by the server thread, make
   -- sure it's rethrown in the test thread.
