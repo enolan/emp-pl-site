@@ -10,9 +10,18 @@ packages:
     git: https://github.com/enolan/async.git
     commit: 9da751d2946da688151cb9861d4fca6baa95c5a6
   extra-dep: true
+- location:
+    git: https://github.com/yesodweb/yesod
+    commit: 9c38a4b08e5267e8fba41612fc08649ce491c0ef
+  subdirs:
+  - yesod-bin
+  extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps: []
+extra-deps:
+- say-0.1.0.0
+- typed-process-0.1.0.0
+- safe-exceptions-0.1.4.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}
