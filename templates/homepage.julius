@@ -48,10 +48,7 @@ function updatePointsTable(prgmScoreEl) {
         averagePointsEl.text("N/A");
     }
     if (availablePoints < 0) {
-        availablePointsEl.addClass("overbudget");
-        prgmScoreEl.addClass("overbudget");
-        $(".btn-score:not(.btn-delete)").prop("disabled", true);
-        window.setTimeout(function () {
+        setOverbudget(prgmScoreEl, function () {
             let prgmScore = Number.parseInt(prgmScoreEl.text());
             if (prgmScore > 0) {
                 prgmScore--;
@@ -61,16 +58,26 @@ function updatePointsTable(prgmScoreEl) {
             prgmScoreEl.text(prgmScore);
             prgmScoreEl.parent().parent().find("span.cost").text(prgmScore * prgmScore);
             updatePointsTable(prgmScoreEl);
-        }, 500)
+        });
         return false;
     } else if (prgmScoreEl !== undefined) {
-        availablePointsEl.removeClass("overbudget");
-        prgmScoreEl.removeClass("overbudget");
-        $(".btn-score:not(.btn-delete)").prop("disabled", false);
         return true;
     }
 }
 
+function setOverbudget(el, cb) {
+    el.addClass("overbudget");
+    let availPointsEl = $("#available-points");
+    let scoreButtons = $(".btn-score");
+    availPointsEl.addClass("overbudget");
+    scoreButtons.prop("disabled", true);
+    window.setTimeout(function () {
+        cb();
+        el.removeClass("overbudget");
+        availPointsEl.removeClass("overbudget");
+        scoreButtons.prop("disabled", false);
+    }, 500);
+}
 $("#explanationButton").click(function (ev) {
     ev.preventDefault();
     clearExampleData();
@@ -134,8 +141,9 @@ function handleScoreButton(ev) {
     let prgmName = tr.find("input.program-name").val();
     let action = "";
     let prgmScoreEl = tr.find("span.score");
-    let prgmScore = prgmScoreEl.text();
+    let prgmScore = Number.parseInt(prgmScoreEl.text());
     let prgmCostEl = tr.find("span.cost");
+    let prgmCost = Number.parseInt(prgmCostEl.text());
     if($(this).hasClass("btn-plus")) {
         action = "plus";
     } else if ($(this).hasClass("btn-minus")) {
@@ -153,20 +161,27 @@ function handleScoreButton(ev) {
         prgmScoreEl.text(--prgmScore);
         break;
     case "delete":
-        if (!tr.hasClass("example-data")) {
-            tr.addClass("pending");
-            $.ajax({
-                method: "DELETE",
-                url: "@{RatingR}",
-                data: {prgmName: prgmName},
-                success: function (data, textStatus, jqxhr) {
-                    tr.remove();
-                    updatePointsTable();
-                }
-            });
+        let availPointsEl = $("#available-points");
+        let availPoints = Number.parseInt(availPointsEl.text());
+        if (availPoints + prgmCost - 25 >= 0) {
+            // if deleting the entry wouldn't make us go negative
+            if (!tr.hasClass("example-data")) {
+                tr.addClass("pending");
+                $.ajax({
+                    method: "DELETE",
+                    url: "@{RatingR}",
+                    data: {prgmName: prgmName},
+                    success: function (data, textStatus, jqxhr) {
+                        tr.remove();
+                        updatePointsTable();
+                    }
+                });
+            } else {
+                tr.remove();
+                updatePointsTable();
+            }
         } else {
-            tr.remove();
-            updatePointsTable();
+            setOverbudget(tr, function() {});
         }
         return;
     }
