@@ -99,12 +99,12 @@ input.program-name {
 }
 tr.pending {
     animation-duration: 1s;
-    animation-name: pulse;
+    animation-name: pulse-pend;
     animation-iteration-count: infinite;
     animation-direction: alternate;
     animation-timing-function: linear;
 }
-@keyframes pulse {
+@keyframes pulse-pend {
     from {
         background-color: white;
     }
@@ -114,4 +114,19 @@ tr.pending {
 }
 .overbudget {
     background: red;
+}
+tr.attention {
+    animation-duration: 0.5s;
+    animation-name: pulse-attn;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: linear;
+}
+@keyframes pulse-attn {
+    from {
+        background-color: white;
+    }
+    to {
+        background-color: lightblue;
+    }
 }

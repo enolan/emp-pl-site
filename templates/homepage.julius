@@ -92,6 +92,24 @@ function clearExampleData() {
 }
 
 function handleProgramNameChange (ev) {
+    // If the new program name is the same as an already existing one, erase it.
+    // Otherwise, set the field read only, POST the empty rating and make a new
+    // blank row.
+    let entryIsDuplicate = false;
+    $("input.program-name").each(function (idx, el) {
+        if (el !== ev.target && el.value === ev.target.value) {
+            ev.target.value = "";
+            entryIsDuplicate = true;
+            let dupeTr = $(el).parent().parent();
+            dupeTr.addClass("attention");
+            window.setTimeout(function () {
+                dupeTr.removeClass("attention");
+            }, 2000);
+        }
+    });
+    if (entryIsDuplicate) {
+        return;
+    }
     ev.target.setAttribute("readonly", "true");
     let el =
         $("<tr>")

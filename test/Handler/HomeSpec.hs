@@ -195,7 +195,7 @@ ratingProp = do
       Nothing   -> fail "couldn't find test user in db"
 
 mkActs :: Gen [RatingAction]
-mkActs = sized (\s -> choose (0,s) >>= go 0)
+mkActs = sized (\s -> choose (0,s) >>= go 0) `suchThat` (namesUnique)
   where
   go _ 0    = return []
   go 0 size = do addpr' <- addpr
@@ -216,6 +216,10 @@ mkActs = sized (\s -> choose (0,s) >>= go 0)
   go' n size = resize size $ go n size
   addpr = AddProgram <$>
     (arbitrary `suchThat` (\s -> not (null s) && all isPrint s))
+  namesUnique ras = getNames ras == ordNub (getNames ras)
+  getNames = catMaybes . map (\ra -> case ra of
+                                 AddProgram nm -> Just nm
+                                 _             -> Nothing)
 
 data RatingAction = Delete Int
                   | AddProgram String
