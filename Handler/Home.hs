@@ -52,10 +52,12 @@ explainBoxW :: Widget
 explainBoxW = [whamlet|
   <#explainBox .container-fluid>
     <p>
-      For every program you rate, you get twenty-five points to spend however
-      you like. Giving something a rating costs as many points as the rating
-      squared, so rating something one costs one point, rating something two
-      costs four points and so on.
+      The Project uses something called "quadratic voting". The idea is to get
+      more accurate expressions of your opinions by making you prioritize. For
+      every program you rate, twenty-five points are added to your total rating
+      budget. Giving something a rating costs as many points as the rating
+      squared, so rating something one costs one point, rating something
+      two costs four points and so on. Both positive and negative ratings work.
     <p>
       Feel free to play with the entries below, then hit the button to dismiss
       this box and get started.
@@ -69,7 +71,7 @@ hidden Visible = False
 data NeedsExplanation = NeedsExplanation | AlreadyExplained deriving Eq
 
 exampleRatings :: [(Text, Int)]
-exampleRatings = [("terri.bl", -7), ("Tolerable Pro 3", 1), ("Shootymans 4", 5)]
+exampleRatings = [("terri.bl", -6), ("Tolerable Pro 3", 1), ("Shootymans 4", 5)]
 
 ratingsBoxW :: Hidden -> Ratings -> Widget
 ratingsBoxW hide Ratings{..} =
