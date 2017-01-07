@@ -26,16 +26,15 @@ postRatingR = do
   case (mbAction, mbPrgmName, mbPrgmScore) of
     (Just _action, Just prgmName, Just prgmScore) ->
       case readMay prgmScore of
-        Just prgmScore' -> do
-          programRes <- runDB $ insertBy
-            Program {programName = prgmName}
-          let programKey = either entityKey id programRes
-          _ratingRes <- runDB $ upsert
-            Rating
-             {ratingUser = uid, ratingProgram = programKey,
-              ratingScore = prgmScore'}
-            [RatingScore =. prgmScore']
-          pure ()
+        Just prgmScore' ->
+          void $ rollbackIfBadPoints uid $ do
+            programRes <- insertBy Program {programName = prgmName}
+            let programKey = either entityKey id programRes
+            void $ upsert
+              Rating
+              {ratingUser = uid, ratingProgram = programKey,
+               ratingScore = prgmScore'}
+              [RatingScore =. prgmScore']
         Nothing -> invalidArgs []
     _ -> invalidArgs []
 
@@ -44,11 +43,13 @@ deleteRatingR = do
   uid <- requireAuthId
   mbPrgmName <- lookupPostParam "prgmName"
   case mbPrgmName of
-    Just prgmName -> runDB $ do
-      prgmId <- getBy (UniqueName prgmName)
-      case prgmId of
-        Just prgmEnt -> deleteBy (UniqueUserProgramPair uid (entityKey prgmEnt))
-        Nothing -> invalidArgs []
+    Just prgmName ->
+      void $ rollbackIfBadPoints uid $ do
+        prgmId <- getBy (UniqueName prgmName)
+        case prgmId of
+          Just prgmEnt -> do
+            deleteBy (UniqueUserProgramPair uid (entityKey prgmEnt))
+          Nothing -> invalidArgs []
     Nothing -> invalidArgs []
 
 getPoints :: Handler (Int,Int)
@@ -56,8 +57,7 @@ getPoints = do
   uid <- requireAuthId
   runDB $ getPointsDB uid
 
-getPointsDB ::
-  MonadIO m => Key User -> ReaderT SqlBackend m (Int, Int)
+getPointsDB :: MonadIO m => Key User -> ReaderT SqlBackend m (Int, Int)
 getPointsDB uid = do
   res <- select $
     from $ \rating -> do
@@ -72,6 +72,22 @@ getPointsDB uid = do
     [(Value (Just ptsSpent), Value totalPoints)] ->
       return (ratToInt ptsSpent, totalPoints)
     _ -> return (0, 0)
+
+-- Run a DB action, if that action put the user into negative points, abort the
+-- transaction and send 400 invalid arguments. Otherwise, return the action's
+-- result.
+rollbackIfBadPoints :: Key User -> YesodDB App a -> Handler (Maybe a)
+rollbackIfBadPoints uid act = do
+  mbRes <- runDB $ do
+    res <- act
+    (ptsSpent, totalPoints) <- getPointsDB uid
+    if ptsSpent > totalPoints
+      then transactionUndo >> return Nothing
+      else return $ Just res
+  case mbRes of
+    Nothing -> do
+      invalidArgs ["Change would use more points than you have"]
+    Just res -> return $ Just res
 
 getRatings :: Handler Ratings
 getRatings = do
