@@ -19,7 +19,7 @@ install:
 - echo PGPASS=$PGPASS >> emp-pl-site_dev_env
 - stack docker pull
 - docker-compose up -d postgres
-- stack build
+- stack build --test --no-run-tests
 - docker-compose up -d selenium
 script:
 - bash dev-certs/genkey.sh
