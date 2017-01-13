@@ -22,6 +22,7 @@ install:
 - echo PGPASS=$PGPASS >> emp-pl-site_dev_env
 - stack docker pull
 - docker-compose up -d postgres
+- stack setup # The GHC in the image is 8.0.1 but we want 8.0.2.
 - stack build --test --no-run-tests
 - docker-compose up -d selenium
 script:
