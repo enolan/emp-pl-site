@@ -9,8 +9,8 @@ import HostnameApi
 import Model                 as X
 import Settings              as X (AppSettings(..))
 
-import ClassyPrelude         as X hiding (assert, delete, deleteBy)
-import Control.Concurrent.Async
+import ClassyPrelude         as X hiding (Handler, assert, delete, deleteBy)
+import Control.Concurrent.Async (link)
 import qualified Control.Monad.Catch as CMC
 import Control.Monad.Except
 import Data.FileEmbed
