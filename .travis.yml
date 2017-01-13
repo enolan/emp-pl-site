@@ -10,6 +10,9 @@ before_install:
 - export PATH=$HOME/.local/bin:$PATH
 - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards
   --strip-components=1 -C ~/.local/bin '*/stack'
+  # hack to work around commercialhaskell/stack#2919
+- cd ~; stack build --resolver lts-7.15; true
+- cd $TRAVIS_BUILD_DIR
 install:
 - cp emp-pl-site_dev_env.sample emp-pl-site_dev_env
 - cat secret-emp-pl-site >> emp-pl-site_dev_env
