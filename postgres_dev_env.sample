@@ -1,2 +1,2 @@
 POSTGRES_USER=empplsite
-POSTGRES_PASSWORD=something
+# POSTGRES_PASSWORD=something
