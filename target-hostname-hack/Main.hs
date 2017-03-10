@@ -15,10 +15,10 @@ import Servant
 
 main :: IO ()
 main = do
-  origHosts <- readFile "/etc/hosts"
+  origHosts <- readFileUtf8 "/etc/hosts"
   run 31337 $ serve (Proxy :: Proxy HostnameApi) $ server origHosts
 
 server :: Text -> Server HostnameApi
 server origHosts targetIP = do
-  writeFile "/etc/hosts" $ origHosts ++ "\n" ++ targetIP ++ " stack-exec.org\n"
+  writeFileUtf8 "/etc/hosts" $ origHosts ++ "\n" ++ targetIP ++ " stack-exec.org\n"
   return True

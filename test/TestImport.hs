@@ -12,7 +12,6 @@ import Settings              as X (AppSettings(..))
 import ClassyPrelude         as X hiding (Handler, assert, delete, deleteBy)
 import Control.Concurrent.Async (link)
 import qualified Control.Monad.Catch as CMC
-import Control.Monad.Except
 import Data.FileEmbed
 import Data.Proxy
 import Database.Persist      as X hiding (get)
@@ -57,7 +56,7 @@ withServerM test = do
   -- Set IP target
   ip <- takeWhile (/='\n') <$> readProcess "hostname" ["-i"] ""
   man <- newManager defaultManagerSettings
-  res <- runExceptT $ client (Proxy :: Proxy HostnameApi) (pack ip) man $ BaseUrl Http "selenium" 31337 ""
+  res <- runClientM (client (Proxy :: Proxy HostnameApi) (pack ip)) $ ClientEnv man $ BaseUrl Http "selenium" 31337 ""
   case res of
     Left ex -> fail $ show ex
     Right True -> return ()

@@ -1,8 +1,7 @@
 # For more information, see: http://docs.haskellstack.org/en/stable/yaml_configuration.html
 
 # Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
-resolver: lts-7.15
-compiler: ghc-8.0.2
+resolver: lts-8.0
 
 # Local packages, usually specified by relative directory name
 packages:
@@ -12,12 +11,12 @@ packages:
     commit: 9da751d2946da688151cb9861d4fca6baa95c5a6
   extra-dep: true
 - location:
-    git: https://github.com/enolan/esqueleto.git
-    commit: dcdceb8b514fbe669e72fbf91c37aa34faebfe7d
-  extra-dep: true
-- location:
     git: https://github.com/enolan/country-codes.git
     commit: 2cfae881a05f375b4a164d6c42e7db61934ba1f3
+  extra-dep: true
+- location:
+    git: https://github.com/enolan/hs-webdriver.git
+    commit: 4d9090fcfaf1ae750ec16be174fff7acb365c92d
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)

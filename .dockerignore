@@ -1,3 +1,4 @@
 .stack-work/*
-!.stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-7.15/8.0.2/bin/target-hostname-hack
+!.stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-8.0/8.0.2/bin/target-hostname-hack
 dist/*
+build-base-image
