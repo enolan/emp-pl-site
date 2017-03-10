@@ -57,6 +57,7 @@ docker:
     - "--net=bridge"
     - "--network"
     - "empplsite_default"
+  image: f394c84f221c
 
 image:
   containers:
