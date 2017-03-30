@@ -38,6 +38,8 @@ $doctype 5
           <footer>
             <div>Software Quality Causes Project by <a href="http://echonolan.net">Echo Nolan</a>.
             <div>Check out the source on <a href="https://github.com/enolan/emp-pl-site">GitHub</a>.
+            <div>
+              Built with <a href="http://www.yesodweb.com/">Yesod</a>, <a href="http://jquery.com/">jQuery</a>, <a href="http://getbootstrap.com">Bootstrap</a>, <a href="https://www.postgresql.org/">PostgreSQL</a> and more. <a href="https://thenounproject.com/search/?similar=62719&i=100169">Garbage icon</a> by Stefan Kovacs.
 
     $maybe analytics <- appAnalytics $ appSettings master
       <script>
