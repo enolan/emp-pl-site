@@ -80,6 +80,8 @@ spec:
               secretKeyRef:
                 name: goauth
                 key: cs
+          - name: IP_FROM_HEADER # Use X-Forwarded-For in logs instead of incoming IP.
+            value: "true"
 ---
 kind: Service
 apiVersion: v1
