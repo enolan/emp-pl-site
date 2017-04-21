@@ -1,0 +1,171 @@
+##########
+# Postgres
+##########
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - image: postgres:9.5
+        name: postgres
+        resources: {}
+        env:
+          - name: POSTGRES_USER
+            value: empplsite
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgrespass
+                key: pass
+        ports:
+          - containerPort: 5432
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pg-service
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+---
+###############
+# Yesod backend
+###############
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: yesod
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: yesod
+    spec:
+      containers:
+      - image: us.gcr.io/emp-pl-site/yesod:latest
+        name: yesod
+        ports:
+          - containerPort: 3000
+        env:
+          - name: PGHOST
+            value: pg-service
+          - name: PGDATABASE
+            value: empplsite
+          - name: PGUSER
+            value: empplsite
+          - name: APPROOT
+            value: "https://goodcode.cc"
+          - name: PGPASS
+            valueFrom:
+              secretKeyRef:
+                name: postgrespass
+                key: pass
+          - name: GOAUTHCID
+            valueFrom:
+              secretKeyRef:
+                name: goauth
+                key: cid
+          - name: GOAUTHCS
+            valueFrom:
+              secretKeyRef:
+                name: goauth
+                key: cs
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yesod-service
+spec:
+  type: NodePort
+  selector:
+    app: yesod
+  ports:
+    - port: 3000
+---
+###############################
+# kube-lego (for Let's Encrypt)
+###############################
+apiVersion: v1
+metadata:
+  name: kube-lego
+data:
+  lego.email: "echo@echonolan.net"
+  lego.url: "https://acme-v01.api.letsencrypt.org/directory"
+kind: ConfigMap
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kube-lego
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kube-lego
+    spec:
+      containers:
+      - name: kube-lego
+        image: jetstack/kube-lego:0.1.3
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "50m"
+        env:
+        - name: LEGO_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              name: kube-lego
+              key: lego.email
+        - name: LEGO_URL
+          valueFrom:
+            configMapKeyRef:
+              name: kube-lego
+              key: lego.url
+        - name: LEGO_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: LEGO_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: emp-pl-site
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "gce"
+spec:
+  tls:
+  - hosts:
+    - goodcode.cc
+    secretName: emp-pl-site-tls
+  rules:
+  - host: goodcode.cc
+    http:
+      paths:
+      - path: "/*"
+        backend:
+          serviceName: yesod-service
+          servicePort: 3000
