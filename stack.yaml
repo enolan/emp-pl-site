@@ -18,6 +18,10 @@ packages:
     git: https://github.com/enolan/hs-webdriver.git
     commit: 4d9090fcfaf1ae750ec16be174fff7acb365c92d
   extra-dep: true
+- location:
+    git: https://github.com/enolan/wai-middleware-ip-block.git
+    commit: 035e4b8b7c0d4c9242967c5bde6b450c8b80c6d4
+  extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 #extra-deps:

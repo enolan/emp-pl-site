@@ -87,6 +87,7 @@ library
                  , wai
                  , wai-extra
                  , wai-logger
+                 , wai-middleware-ip-block
                  , warp
                  , yaml
                  , yesod
