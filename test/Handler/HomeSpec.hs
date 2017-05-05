@@ -76,8 +76,9 @@ spec = do
     it "loads the homepage" $
       get HomeR
   describe "homepage (selenium)" $ do
-    it "lets you log in" $ withServerM $ do
-      loginGoogle
+    it "lets you log in (dummy mode)" $ withServerM $ do
+      loginDummy
+      openRoute HomeR
       -- Just check it exists
       _demoForm <- wait $ WD.findElem $ WD.ById "demoForm"
       return ()
@@ -233,29 +234,6 @@ loginDummy = do
         "$.ajax({async: false, data: {ident: \"test\"}, method: \"POST\"," <>
         "url: \"https://stack-exec.org:3443/auth/page/dummy\"})"
       return ()
-
-loginGoogle :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
-loginGoogle = do
-      openRoute HomeR
-      loginLink <- WD.findElem $ WD.ByPartialLinkText "log in via Google"
-      loginHref <- WD.attr loginLink "href"
-      authUrl <- mkUrl $ AuthR LoginR
-      liftIO $ loginHref `shouldBe` Just authUrl
-      WD.click loginLink
-      emailField <- WD.findElem $ WD.ById "Email"
-      settings <- (appSettings . fst) <$> ask
-      WD.sendKeys (fromJust $ googleUser settings) emailField
-      nextButton <- WD.findElem $ WD.ById "next"
-      WD.click nextButton
-      passwdField <- wait $ WD.findElem $ WD.ById "Passwd"
-      WD.sendKeys (fromJust $ googlePassword settings) passwdField
-      signInButton <- WD.findElem $ WD.ById "signIn"
-      WD.click signInButton
-      url <- WD.getCurrentURL
-      when ("google" `isInfixOf` url) $ do
-        approveButton <- WD.findElem $ WD.ById "submit_approve_access"
-        wait $ WDWait.expect =<< isClickable approveButton
-        WD.click approveButton
 
 enterDemo :: (MonadReader (TestApp App) m, WD.WebDriver m, MonadIO m) => m ()
 enterDemo = do
