@@ -1,6 +1,5 @@
 # IP blocks for local devel/testing. Deployment is different!
-defaultAllow: false
+defaultAllow: true
 trustForwardedFor: false
-routeSpecs:
-  - range: "127.0.0.1"
-    allow: true
+# Can't only allow 127.0.0.1, because selenium comes from a container with its own IP
+routeSpecs: []
