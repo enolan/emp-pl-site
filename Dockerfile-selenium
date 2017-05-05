@@ -11,4 +11,7 @@ RUN sudo chmod +x /opt/bin/entrypoint.sh
 RUN sudo apt-get update && sudo apt-get install libpq5
 ADD .stack-work/install/x86_64-linux-dkda49f7ca9b244180d3cfb1987cbc9743/lts-8.0/8.0.2/bin/target-hostname-hack /opt/bin/target-hostname-hack
 
+# See SeleniumHQ/docker-selenium#87
+ENV DBUS_SESSION_BUS_ADDRESS=/dev/null
+
 CMD /opt/bin/entrypoint.sh
