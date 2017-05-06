@@ -5,8 +5,6 @@ APPROOT=https://localhost:3443
 # Only works if launched from the right place
 IP_BLOCK_CFG=config/block.yml
 # add your own stuff here
-# GOOGLEUSER=
-# GOOGLEPASSWORD=
 # PGPASS=
 # GOAUTHCID=
 # GOAUTHCS=

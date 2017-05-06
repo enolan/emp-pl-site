@@ -55,8 +55,6 @@ data AppSettings = AppSettings
 
     , gOAuthCID                 :: Text
     , gOAuthCS                  :: Text
-    , googleUser                :: Maybe Text
-    , googlePassword            :: Maybe Text
     }
 
 instance FromJSON AppSettings where
@@ -84,9 +82,6 @@ instance FromJSON AppSettings where
         appAllowDummyAuth         <- o .:  "allowDummyAuth"
         gOAuthCID                 <- o .:  "gOAuthCID"
         gOAuthCS                  <- o .:  "gOAuthCS"
-
-        googleUser                <- o .:? "googleUser"
-        googlePassword            <- o .:? "googlePassword"
 
         return AppSettings {..}
 
