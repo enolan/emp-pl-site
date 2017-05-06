@@ -1,5 +1,7 @@
 # Software Quality Causes Project Survey Site
 
+[![Build Status](https://travis-ci.org/enolan/emp-pl-site.svg?branch=master)](https://travis-ci.org/enolan/emp-pl-site)
+
 This site surveys people about their opinions on the quality of the software
 they use. It may or may not be online at goodcode.cc. This is part of a larger
 project studying the effects of programming languages, tools and practices on
