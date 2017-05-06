@@ -6,7 +6,6 @@ import           TestImport
 import           Data.Aeson (Value)
 import           Data.Char (isPrint)
 import           Data.CountryCodes (CountryCode(US))
-import           Data.Maybe (fromJust)
 import           Data.Text.ICU.Normalize
 import           Data.Time.Format
 import           Database.Esqueleto hiding (Value, (==.), count, get)
@@ -26,11 +25,6 @@ openRoute ::
   (MonadReader (TestApp App) m, MonadIO m,
    RedirectUrl App a, WD.WebDriver m) => a -> m ()
 openRoute r = (unpack <$> mkUrl r) >>= WD.openPage
-
-isClickable :: WD.WebDriver m => WD.Element -> m Bool
-isClickable el = (&&) <$> displayed <*> enabled
-  where displayed = WD.isDisplayed el
-        enabled = WD.isEnabled el
 
 wait :: WD.WebDriver m => m a -> m a
 wait = WDWait.waitUntil 5

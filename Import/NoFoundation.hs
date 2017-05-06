@@ -8,7 +8,7 @@ import Model.CountryCodes    as Import ()
 import Settings              as Import
 import Settings.StaticFiles  as Import
 
-import ClassyPrelude.Yesod as Import hiding (Handler, setTitle)
+import ClassyPrelude.Yesod as Import hiding (setTitle)
 import Yesod.Auth            as Import
 import Yesod.Core.Types      as Import (loggerSet)
 import qualified Yesod.Core.Widget(setTitle)
