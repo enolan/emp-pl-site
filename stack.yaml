@@ -20,7 +20,7 @@ packages:
   extra-dep: true
 - location:
     git: https://github.com/enolan/wai-middleware-ip-block.git
-    commit: 035e4b8b7c0d4c9242967c5bde6b450c8b80c6d4
+    commit: fde3ac71a69ba45a37b537ccffbeac0492a9cdb0
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)

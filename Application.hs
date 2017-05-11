@@ -89,7 +89,7 @@ makeApplication foundation = do
     -- Create the WAI application and apply middlewares
     appPlain <- toWaiAppPlain foundation
     ipBlock <- ipBlockMiddlewareFromFileEnv "IP_BLOCK_CFG" basicDenyResponse
-    return $ ipBlock $ logWare $ defaultMiddlewaresNoLogging appPlain
+    return $ logWare $ ipBlock $ defaultMiddlewaresNoLogging appPlain
 
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation =
