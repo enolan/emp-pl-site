@@ -1,6 +1,7 @@
 sudo: required
 services: docker
 language: c
+
 before_install:
   # env vars GOOGLEUSER GOOGLEPASSWORD GOAUTHCID GOAUTHCS
 - openssl aes-256-cbc -K $encrypted_089d332adc0c_key -iv $encrypted_089d332adc0c_iv
@@ -11,6 +12,7 @@ before_install:
 - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards
   --strip-components=1 -C ~/.local/bin '*/stack'
 - cd $TRAVIS_BUILD_DIR
+
 install:
 - cp emp-pl-site_dev_env.sample emp-pl-site_dev_env
 - cat secret-emp-pl-site >> emp-pl-site_dev_env
@@ -23,5 +25,26 @@ install:
 - bash dev-certs/genkey.sh
 - stack build --test --no-run-tests
 - docker-compose up -d selenium
+
 script:
 - stack --no-terminal --install-ghc test
+
+jobs:
+  include:
+    - stage: Build snapshot deps
+      install:
+        - mkdir -p ~/.local/bin
+        - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards
+          --strip-components=1 -C ~/.local/bin '*/stack'
+        - stack docker pull
+        # Have to create some dummy stuff so Stack will launch the container
+        # successfully, even though it's not going to use any of it.
+        - touch emp-pl-site_dev_env
+        - docker network create empplsite_default
+        - stack build --only-snapshot --test --no-run-tests
+      script: true
+    - stage: Test
+
+cache:
+  directories:
+    - $HOME/.stack
