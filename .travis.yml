@@ -37,7 +37,7 @@ jobs:
         # successfully, even though it's not going to use any of it.
         - touch emp-pl-site_dev_env
         - docker network create empplsite_default
-        - stack build --only-snapshot
+        - stack build --only-snapshot --test --no-run-tests
       script: true
     - stage: Test
 cache:
