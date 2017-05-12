@@ -1,7 +1,7 @@
 # For more information, see: http://docs.haskellstack.org/en/stable/yaml_configuration.html
 
 # Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
-resolver: lts-8.0
+resolver: lts-8.13
 
 # Local packages, usually specified by relative directory name
 packages:
@@ -13,10 +13,6 @@ packages:
 - location:
     git: https://github.com/enolan/country-codes.git
     commit: 2cfae881a05f375b4a164d6c42e7db61934ba1f3
-  extra-dep: true
-- location:
-    git: https://github.com/enolan/hs-webdriver.git
-    commit: 4d9090fcfaf1ae750ec16be174fff7acb365c92d
   extra-dep: true
 - location:
     git: https://github.com/enolan/wai-middleware-ip-block.git
