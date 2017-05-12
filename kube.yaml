@@ -24,8 +24,18 @@ spec:
               secretKeyRef:
                 name: postgrespass
                 key: pass
+          - name: PGDATA
+            value: /pgdata/db
         ports:
           - containerPort: 5432
+        volumeMounts:
+          - name: postgres-volume
+            mountPath: /pgdata
+      volumes:
+        - name: postgres-volume
+          gcePersistentDisk:
+            pdName: postgres-disk
+            fsType: ext4
 ---
 kind: Service
 apiVersion: v1
