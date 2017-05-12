@@ -25,3 +25,18 @@ install:
 - docker-compose up -d selenium
 script:
 - stack --no-terminal --install-ghc test
+jobs:
+  include:
+    - stage: Build snapshot deps
+      before_install: true
+      install:
+        - mkdir -p ~/.local/bin
+        - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards
+          --strip-components=1 -C ~/.local/bin '*/stack'
+        - stack docker pull
+        - stack build --only-snapshot
+      script: true
+    - stage: Test
+cache:
+  directories:
+    - $HOME/.stack/snapshots
