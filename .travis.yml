@@ -33,10 +33,7 @@ jobs:
         - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards
           --strip-components=1 -C ~/.local/bin '*/stack'
         - stack docker pull
-        # This needs to exist for Stack to launch Docker, but it won't actually
-        # read any of the variables so we just make a blank one.
-        - touch emp-pl-site_dev_env
-        - stack build --only-snapshot
+        - stack build --docker-run-args "" --only-snapshot
       script: true
     - stage: Test
 cache:
