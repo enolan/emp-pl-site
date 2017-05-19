@@ -1,6 +1,21 @@
 ##########
 # Postgres
 ##########
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200G
+  selector:
+    matchLabels:
+      diskFor: postgres
+  storageClassName: ""
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -33,9 +48,8 @@ spec:
             mountPath: /pgdata
       volumes:
         - name: postgres-volume
-          gcePersistentDisk:
-            pdName: postgres-disk
-            fsType: ext4
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
 ---
 kind: Service
 apiVersion: v1
@@ -74,7 +88,10 @@ spec:
           - name: PGUSER
             value: empplsite
           - name: APPROOT
-            value: "https://goodcode.cc"
+            valueFrom:
+              configMapKeyRef:
+                name: url
+                key: root
           - name: PGPASS
             valueFrom:
               secretKeyRef:
@@ -112,28 +129,6 @@ spec:
     app: yesod
   ports:
     - port: 3000
----
-kind: ConfigMap
-apiVersion: v1
-data:
-  block-kube.yml: |
-    # IP blocking for deployment on GKE.
-    defaultAllow: false
-    trustForwardedFor: true
-    routeSpecs:
-      # My house
-      - range: "67.189.87.218"
-        allow: true
-      # Load balancer health check. The probes come from 10.100.1.1, but maybe
-      # that'll change when I have more than one node?? I really don't
-      # understand this. The Google load balancer docs say probes come from
-      # a different IP range. I think this is something to do with kube-proxy.
-      # https://cloud.google.com/compute/docs/load-balancing/health-checks#https_ssl_proxy_tcp_proxy_and_internal_load_balancing
-      - range: "10.100.0.0/16"
-        allow: true
-metadata:
-  creationTimestamp: null
-  name: ip-block
 ---
 ###############################
 # kube-lego (for Let's Encrypt)
@@ -191,24 +186,3 @@ spec:
             port: 8080
           initialDelaySeconds: 5
           timeoutSeconds: 1
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: emp-pl-site
-  annotations:
-    kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: "gce"
-spec:
-  tls:
-  - hosts:
-    - goodcode.cc
-    secretName: emp-pl-site-tls
-  rules:
-  - host: goodcode.cc
-    http:
-      paths:
-      - path: "/*"
-        backend:
-          serviceName: yesod-service
-          servicePort: 3000

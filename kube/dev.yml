@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+---
+kind: ConfigMap
+apiVersion: v1
+data:
+  block-kube.yml: |
+    # IP blocking for deployment on GKE.
+    defaultAllow: false
+    trustForwardedFor: true
+    routeSpecs:
+      # My house
+      - range: "67.189.87.218"
+        allow: true
+      # Load balancer health check. The probes come from 10.100.1.1, but maybe
+      # that'll change when I have more than one node?? I really don't
+      # understand this. The Google load balancer docs say probes come from
+      # a different IP range. I think this is something to do with kube-proxy.
+      # https://cloud.google.com/compute/docs/load-balancing/health-checks#https_ssl_proxy_tcp_proxy_and_internal_load_balancing
+      - range: "10.100.0.0/16"
+        allow: true
+metadata:
+  name: ip-block
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: emp-pl-site
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: k8s-fw-dev-emp-pl-site--60b3bd0370a060fd
+spec:
+  tls:
+  - hosts:
+    - dev.goodcode.cc
+    secretName: emp-pl-site-tls
+  rules:
+  - host: dev.goodcode.cc
+    http:
+      paths:
+      - path: "/*"
+        backend:
+          serviceName: yesod-service
+          servicePort: 3000
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  root: "https://dev.goodcode.cc"
+metadata:
+  name: url
+---
+# This attaches the volume to Kube but doesn't allocate it. It has to have
+# already been created through the gcloud API.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pgdisk-dev
+  labels:
+    diskFor: postgres
+spec:
+  capacity:
+    storage: 200G
+  accessModes:
+      - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  gcePersistentDisk:
+      pdName: pgdisk-dev
