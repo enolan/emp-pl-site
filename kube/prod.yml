@@ -13,11 +13,13 @@ data:
     routeSpecs: []
 metadata:
   name: ip-block
+  namespace: prod
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: emp-pl-site
+  namespace: prod
   annotations:
     kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: "gce"
@@ -42,6 +44,7 @@ data:
   root: "https://goodcode.cc"
 metadata:
   name: url
+  namespace: prod
 ---
 # This attaches the volume to Kube but doesn't allocate it. It has to have
 # already been created through the gcloud API.
@@ -49,6 +52,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: pgdisk-prod
+  namespace: prod
   labels:
     diskFor: postgres
 spec:
