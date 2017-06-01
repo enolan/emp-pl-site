@@ -11,10 +11,7 @@ spec:
   resources:
     requests:
       storage: 200G
-  selector:
-    matchLabels:
-      diskFor: postgres
-  storageClassName: ""
+  storageClassName: standard
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment

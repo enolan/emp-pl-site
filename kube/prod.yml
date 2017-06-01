@@ -45,20 +45,3 @@ data:
 metadata:
   name: url
   namespace: prod
----
-# This attaches the volume to Kube but doesn't allocate it. It has to have
-# already been created through the gcloud API.
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pgdisk-prod
-  labels:
-    diskFor: postgres
-spec:
-  capacity:
-    storage: 200G
-  accessModes:
-      - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  gcePersistentDisk:
-      pdName: pgdisk-prod
