@@ -1,3 +1,6 @@
 $maybe msg <- mmsg
   <div #message>#{msg}
+<h1.jumbotron>
+  Software Quality Causes Project
+
 ^{widget}
