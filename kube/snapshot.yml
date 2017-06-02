@@ -1,0 +1,32 @@
+###########################################
+# Backup system
+###########################################
+
+# snapshot-controller backs up all GCE volumes regardless of the k8s namespace
+# of any PersistVolumeClaims, so it gets its own namespace.
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: snapshot
+---
+kind: Deployment
+apiVersion: apps/v1beta1
+metadata:
+  name: snapshot-controller
+  namespace: snapshot
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: snapshot-controller
+    spec:
+      containers:
+        - image: quay.io/linki/snapshot-controller@sha256:4487e10ed4c8d922d0c908fdae5dbb8d61e2f840ebd74b5ab179b7e905ac2a91
+          name: snapshot-controller
+          args:
+            - --in-cluster
+            - --zone=us-west1-b
+            - --project=emp-pl-site
+            - --interval=6h
+            - --retain=60
