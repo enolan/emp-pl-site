@@ -6,4 +6,5 @@
 
 / HomeR GET
 /demoForm DemoFormR POST
+/privacy PrivacyR GET
 /rating RatingR POST DELETE

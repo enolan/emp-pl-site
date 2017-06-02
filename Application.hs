@@ -20,6 +20,7 @@ import Import
 
 import Handler.Common
 import Handler.Home
+import Handler.Privacy
 import Handler.Ratings
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)

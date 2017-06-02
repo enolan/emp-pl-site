@@ -37,6 +37,7 @@ $doctype 5
             ^{pageBody pc}
           <footer>
             <div>Software Quality Causes Project by <a href="http://echonolan.net">Echo Nolan</a>.
+            <div><a href=@{PrivacyR}>Privacy policy here.</a>
             <div>Copyright 2016-2017, licensed under the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">GNU Affero General Public License, version 3</a>.
             <div>Check out the source on <a href="https://github.com/enolan/emp-pl-site">GitHub</a>.
             <div>
