@@ -96,7 +96,7 @@ makeApplication foundation = do
 -- | 'wai-extra''s 'forceSSL' doesn't work with Google's load balancer. It
 --   redirects *all* incoming requests that don't come in over HTTPS and don't
 --   have a header indicating they're forwarded from HTTPS. This means that
---   the health checks that the LB sends get 304 responses, which counts as
+--   the health checks that the LB sends get 301 responses, which counts as
 --   failing. This function only redirects requests that have X-Forwarded-Proto
 --   == http. The health checks aren't forwarded, and therefore don't have the
 --   header.
