@@ -28,11 +28,11 @@ import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
                                              pgPoolSize, runSqlPool)
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.Wai (Middleware)
+import qualified Network.Wai as Wai
 import Network.Wai.Handler.Warp             (Settings, defaultSettings,
                                              defaultShouldDisplayException,
                                              runSettings, setHost,
                                              setOnException, setPort, getPort)
-import Network.Wai.Middleware.ForceSSL      (forceSSL)
 import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              IPAddrSource (..),
                                              OutputFormat (..), destination,
@@ -91,7 +91,31 @@ makeApplication foundation = do
     -- Create the WAI application and apply middlewares
     appPlain <- toWaiAppPlain foundation
     ipBlock <- ipBlockMiddlewareFromFileEnv "IP_BLOCK_CFG" basicDenyResponse
-    return $ logWare $ ipBlock $ forceSSL $ defaultMiddlewaresNoLogging appPlain
+    return $ logWare $ ipBlock $ forceSSLGoogleLoadBalancer $ defaultMiddlewaresNoLogging appPlain
+
+-- | 'wai-extra''s 'forceSSL' doesn't work with Google's load balancer. It
+--   redirects *all* incoming requests that don't come in over HTTPS and don't
+--   have a header indicating they're forwarded from HTTPS. This means that
+--   the health checks that the LB sends get 304 responses, which counts as
+--   failing. This function only redirects requests that have X-Forwarded-Proto
+--   == http. The health checks aren't forwarded, and therefore don't have the
+--   header.
+forceSSLGoogleLoadBalancer :: Middleware
+forceSSLGoogleLoadBalancer app req sendResp =
+  case ((lookup "X-Forwarded-Proto" $ Wai.requestHeaders req) == Just "http",
+        redirectResponse req) of
+    (True, Just resp) -> sendResp resp
+    _                 -> app req sendResp
+
+redirectResponse :: Wai.Request -> Maybe Wai.Response
+redirectResponse req = do
+  host <- Wai.requestHeaderHost req
+  return $ Wai.responseBuilder status [(hLocation, location host)] mempty
+  where
+    location h = "https://" <> h <> Wai.rawPathInfo req <> Wai.rawQueryString req
+    status
+        | Wai.requestMethod req == methodGet = status301
+        | otherwise = status307
 
 makeLogWare :: App -> IO Middleware
 makeLogWare foundation =
