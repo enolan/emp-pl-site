@@ -67,8 +67,9 @@ assertDoesNotExist selector = do
 spec :: Spec
 spec = do
   withApp $ describe "homepage (yesod-test)" $
-    it "loads the homepage" $
+    it "loads the homepage" $ do
       get HomeR
+      statusIs 200
   describe "homepage (selenium)" $ do
     it "lets you log in (dummy mode)" $ withServerM $ do
       loginDummy
