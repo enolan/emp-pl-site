@@ -149,6 +149,7 @@ test-suite test
                  , hspec
                  , hspec-webdriver
                  , http-client
+                 , http-types
                  , monad-logger
                  , mtl
                  , persistent

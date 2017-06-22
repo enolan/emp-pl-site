@@ -56,7 +56,19 @@ instance Yesod App where
         120    -- timeout in minutes
         "config/client_session_key.aes"
 
-    yesodMiddleware = sslOnlyMiddleware 120 . defaultCsrfMiddleware
+    yesodMiddleware = sslOnlyMiddleware 120 . defaultCsrfMiddleware . sessionRefererMW
+      where sessionRefererMW h = do
+              -- The idea here is to put the *first* referer we see into the
+              -- session. This should be the site that originally linked to
+              -- goodcode.cc. We don't want internal referers or the Google
+              -- login page.
+              let sessionKey = "ORIG_REFERER"
+              mbRefHeader <- lookupHeader "Referer"
+              mbRefSession <- lookupSession sessionKey
+              case (mbRefHeader, mbRefSession) of
+                (Just refHeader, Nothing) -> setSession sessionKey $ TE.decodeUtf8 refHeader
+                _ -> pure ()
+              h
 
     defaultLayout widget = do
         master <- getYesod
@@ -148,8 +160,9 @@ instance YesodAuth App where
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
     authenticate creds = do
+      mbSessionReferer <- lookupSession "ORIG_REFERER"
       let email = credsIdent creds
-          user = User email
+          user = User email mbSessionReferer
       res <- runDB $ insertBy user
       pure $ Authenticated $ either entityKey id res
     authPlugins app =

@@ -1,6 +1,7 @@
 User
     email Text
     UniqueEmail email
+    origReferer Text Maybe
     deriving Typeable Show Eq
 UserDemographics
     user UserId
