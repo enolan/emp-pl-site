@@ -19,7 +19,7 @@ data:
       # understand this. The Google load balancer docs say probes come from
       # a different IP range. I think this is something to do with kube-proxy.
       # https://cloud.google.com/compute/docs/load-balancing/health-checks#https_ssl_proxy_tcp_proxy_and_internal_load_balancing
-      - range: "10.100.0.0/16"
+      - range: "10.0.0.0/8"
         allow: true
 metadata:
   name: ip-block

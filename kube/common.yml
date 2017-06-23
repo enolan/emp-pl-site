@@ -73,7 +73,7 @@ spec:
         app: yesod
     spec:
       containers:
-      - image: us.gcr.io/emp-pl-site/yesod@sha256:6c5c2b2c9a94a3c949334f15302a4dbd44509c8c2089ea83d2e3939c8d486229
+      - image: us.gcr.io/emp-pl-site/yesod@sha256:0468deda2464d14046beae86a44425f2032f167db2ab048c9df08ab42787b360
         name: yesod
         ports:
           - containerPort: 3000
